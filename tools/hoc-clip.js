@@ -13,7 +13,11 @@ const fs = require('fs'), path = require('path'), os = require('os'), { spawn } 
 const { start, ROOT, VIDEOS } = require('./serve.js');
 const argv = process.argv.slice(2), opt = (k, d) => { const i = argv.indexOf(k); return i >= 0 ? argv[i + 1] : d; };
 const PORT = +opt('--port', 8790), CDP_PORT = +opt('--cdp-port', 9466);
-const CDP = path.resolve(ROOT, '..', 'chaos-battle-lab', 'tools', 'x', 'cdp.js');
+// Repo game nằm CẠNH repo này, tên có thể có tiền tố số để xếp lên đầu (Mac của anh: "1. chaos-battle-lab", PC: "chaos-battle-lab") → tìm theo đuôi tên
+const GAME = (() => { const up = path.resolve(ROOT, '..'); let n = 'chaos-battle-lab';
+  try { n = fs.readdirSync(up).find(d => d.replace(/^[\d.\s_-]+/, '') === 'chaos-battle-lab' && fs.existsSync(path.join(up, d, 'tools', 'x', 'cdp.js'))) || n; } catch (e) {}
+  return path.join(up, n); })();
+const CDP = path.join(GAME, 'tools', 'x', 'cdp.js');
 const PROFILE = path.join(os.tmpdir(), 'mal-browser-profile');
 const secs = v => v == null ? null : String(v).includes(':') ? String(v).split(':').reduce((a, x) => a * 60 + +x, 0) : +v;
 function ytdlp(url, out, fmt) {
@@ -43,7 +47,7 @@ async function inBrowser(pagePath, waitMin) {
 }
 
 (async () => {
-  if (!fs.existsSync(CDP)) { console.error('Không thấy ' + CDP + ' — cần repo chaos-battle-lab nằm cạnh meme-anime-lab.'); process.exit(2); }
+  if (!fs.existsSync(CDP)) { console.error('Không thấy ' + CDP + ' — cần repo chaos-battle-lab (hoặc "1. chaos-battle-lab") nằm cạnh repo này.'); process.exit(2); }
   if (opt('--page')) {   // dò lỗi: chạy 1 trang bất kỳ của repo, in window.__done
     const srv = await new Promise(r => start(PORT, r)); const r = await inBrowser(opt('--page'), 2); console.log(r.msg); srv.close(); return;
   }

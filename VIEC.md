@@ -19,8 +19,8 @@ Công cụ (9/11):
 - `--test` luôn chạy 10 khung/giây. Đáp án: `OK 3 cảnh · 62 khung · 1 bảng khung · flash 2 · âm bản 0 · onset 3 · nhịp 3 · lặng 0`.
 
 ## Mac — làm khi mở phiên lần đầu ở Mac
-1. Mac: `chaos-battle-lab` CÓ SẴN ở `~/Desktop/chaos-battle-lab` (anh nói 9/11) → `git pull` ở đó; clone repo này vào `~/Desktop/meme-anime-lab`
-   (cạnh nhau là đủ — công cụ dùng đường dẫn `../chaos-battle-lab`, `../meme-anime-lab`; Mac KHÔNG cần thư mục `0.van-phong-ao`).
+1. Mac: repo game CÓ SẴN ở `~/Desktop/1. chaos-battle-lab` (anh đặt "1. " cho lên đầu, 9/11) → `git pull` ở đó; clone repo này vào `~/Desktop/1. meme-anime-lab` (đặt tên giống)
+   (cạnh nhau là đủ — hoc-clip.js tự tìm thư mục game cạnh bên dù có tiền tố số; Mac KHÔNG cần `0.van-phong-ao`. Tài liệu ghi `../meme-anime-lab` / `../chaos-battle-lab` = thư mục cạnh bên, trên Mac là bản có "1. ").
 2. `node tools/hoc-clip.js --test` → phải ra đúng đáp án trên. Sai thì sửa tools/ trước, chưa nạp clip thật.
 3. Mac có yt-dlp + ffmpeg: nạp YouTube dùng `--yt` như PC (đã viết chạy cả 2 máy, nhưng CHƯA thử trên Mac), hoặc lệnh yt-dlp tải đoạn trong CLAUDE.md.
 4. Video gốc trên Mac để ở `videos/` trong repo (gitignore) — `serve.js` tự chọn.
