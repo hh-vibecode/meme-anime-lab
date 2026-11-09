@@ -1,6 +1,6 @@
 # Luật đạo diễn (gom từ clip đã học)
 Mỗi luật ghi nguồn `(clips/<id> shot / giây)`. Công thức code tương ứng: `cong-thuc.md`. Số liệu nhịp: `nhip.md`.
-Đã học: kaiju-a (Avengers, quái chui cổng) · kaiju-b (Cửu Vĩ phá làng Lá) · fight-1 (Gojo vs Sukuna, AMV ghép fan-animation).
+Đã học: kaiju-a (Avengers, quái chui cổng) · kaiju-b (Cửu Vĩ phá làng Lá) · fight-1 (Gojo vs Sukuna, AMV ghép fan-animation) · gojo-domain-1 (Gojo mở Vô Lượng Không Xứ, JJK).
 
 ## Quái khổng lồ (lộ diện)
 - BỘ BA lộ diện: cực cận lướt dọc thân (quái tràn khung, KHÔNG thấy hết) ~2.5s → toàn cảnh góc giun có toà nhà làm thước đo, quái nhỏ trên trời,
@@ -34,6 +34,11 @@ Mỗi luật ghi nguồn `(clips/<id> shot / giây)`. Công thức code tương 
 - Kể đòn bằng BÓNG ĐỔ trên tường, không vẽ nhân vật. (fight-1 E)
 
 ## Lãnh địa / kết giới
+- MỞ LÃNH ĐỊA (Gojo, chuẩn anime): kết ấn TĨNH 0.8s trên nền TRẮNG hồng → MỰC ĐEN bung từ sau lưng 0.4s (người vẫn rõ) → ĐƯỜNG HẦM vệt sáng tím-hồng-trắng
+  lao về máy 1.2–3.7s → TRẮNG XOÁ 1 khung → không gian lãnh địa ĐỨNG YÊN ~1.7s → vệt MỰC TRẮNG quét ngang. (gojo-domain-1)
+- Vô Lượng Không Xứ = HỐ ĐEN viền vòng sáng trắng nhiều lớp (mép ánh cầu vồng mờ) + nền vũ trụ xanh đen + dải tinh vân trắng; người đứng bóng đen viền sáng.
+  KHÔNG dùng xoáy màu xanh-tím (anh chê 9/11). (gojo-domain-1 #9)
+- Chữ tên chiêu trên màn hình CHỈ tiếng Anh, không chữ Hán; tiếng Nhật là giọng đọc (anh dặn 9/11).
 - Kết ấn ĐỐI XỨNG: A kết ấn (chữ thập ngắm → xoáy màu A, 0.7s) → wipe bóng lá → B cùng bố cục, màu B (0.7s). (fight-1 F1–F4)
 - Lãnh địa mở = cả khung đổi sang 1 màu (đỏ), nhân vật đen bóng trước kiến trúc lãnh địa. (fight-1 F14)
 - Chém vô hình: nền đen + nét chém trắng bay loạn → vết thương xuất hiện sau. (fight-1 F8, F11)
