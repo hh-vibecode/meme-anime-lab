@@ -7,3 +7,5 @@ videos/
 *.local.*
 .DS_Store
 Thumbs.db
+# kết quả chạy thử công cụ
+clips/_test/

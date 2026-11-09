@@ -1,0 +1,69 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Video thử</title></head><body>
+<script>
+// Tạo video THỬ 6s để kiểm tools/cat-canh.html — biết trước đáp án:
+//   cắt máy ở 2.0s và 4.0s (3 cảnh đỏ / xanh dương / xanh lá), khung LOÉ trắng 3.0–3.2s (không phải cắt máy),
+//   tiếng "bíp" bật ở 1.0s, 2.5s, 4.5s. Ghi ra videos/_test.webm (gitignore).
+// Edge chạy ngầm KHÔNG ghi được MediaRecorder (ra 0 byte, thử 9/11) → mã hoá từng khung bằng WebCodecs (VP8 + Opus) rồi tự đóng gói WebM.
+const W = 640, H = 360, FPS = 30, DUR = 6.2, SR = 48000;
+// ---------- EBML / WebM tối giản ----------
+const enc8 = s => new TextEncoder().encode(s);
+const cat = arrs => { const n = arrs.reduce((s, a) => s + a.length, 0), o = new Uint8Array(n); let p = 0; for (const a of arrs) { o.set(a, p); p += a.length; } return o; };
+const idB = id => { const b = []; while (id > 0) { b.unshift(id & 255); id = Math.floor(id / 256); } return new Uint8Array(b); };
+const size8 = n => { const b = new Uint8Array(8); b[0] = 1; for (let i = 7; i >= 1; i--) { b[i] = n % 256; n = Math.floor(n / 256); } return b; };
+const el = (id, data) => cat([idB(id), size8(data.length), data]);
+const uint = (n, len) => { const b = []; do { b.unshift(n % 256); n = Math.floor(n / 256); } while (n > 0); while (len && b.length < len) b.unshift(0); return new Uint8Array(b); };
+const flt = x => { const b = new Uint8Array(8); new DataView(b.buffer).setFloat64(0, x); return b; };
+const eU = (id, n, len) => el(id, uint(n, len)), eS = (id, s) => el(id, enc8(s)), eF = (id, x) => el(id, flt(x));
+
+(async () => {
+  // hình
+  const c = new OffscreenCanvas(W, H), g = c.getContext('2d'), vChunks = [];
+  const ve = new VideoEncoder({ output: (ch) => { const d = new Uint8Array(ch.byteLength); ch.copyTo(d); vChunks.push({ ts: ch.timestamp / 1000, key: ch.type === 'key', d, tr: 1 }); }, error: e => { throw e; } });
+  ve.configure({ codec: 'vp8', width: W, height: H, bitrate: 1.5e6, framerate: FPS });
+  const N = Math.round(DUR * FPS);
+  for (let i = 0; i < N; i++) {
+    const t = i / FPS, flash = t >= 3.0 && t < 3.2;
+    g.fillStyle = flash ? '#fff' : t < 2 ? '#c0302a' : t < 4 ? '#2a50c0' : '#2aa050'; g.fillRect(0, 0, W, H);
+    if (!flash) { g.fillStyle = '#ffe'; g.beginPath(); g.arc(80 + (t % 2) * 240, 180, 40, 0, 7); g.fill(); }
+    g.fillStyle = '#000'; g.font = '28px monospace'; g.fillText(t.toFixed(2), 20, 40);
+    const f = new VideoFrame(c, { timestamp: Math.round(t * 1e6) }); ve.encode(f, { keyFrame: i % 15 === 0 }); f.close();
+  }
+  await ve.flush();
+  // tiếng: bíp 880Hz 0.15s ở 1.0 / 2.5 / 4.5s
+  const pcm = new Float32Array(Math.round(DUR * SR));
+  for (const at of [1.0, 2.5, 4.5]) for (let i = 0; i < 0.15 * SR; i++) pcm[Math.round(at * SR) + i] = 0.8 * Math.sin(2 * Math.PI * 880 * i / SR);
+  const aChunks = []; let desc = null;
+  const ae = new AudioEncoder({ output: (ch, meta) => { if (meta && meta.decoderConfig && meta.decoderConfig.description) desc = new Uint8Array(meta.decoderConfig.description);
+    const d = new Uint8Array(ch.byteLength); ch.copyTo(d); aChunks.push({ ts: ch.timestamp / 1000, key: true, d, tr: 2 }); }, error: e => { throw e; } });
+  ae.configure({ codec: 'opus', sampleRate: SR, numberOfChannels: 1, bitrate: 64000 });
+  for (let p = 0; p < pcm.length; p += 960) { const fr = pcm.slice(p, p + 960); if (fr.length < 960) break;
+    const ad = new AudioData({ format: 'f32', sampleRate: SR, numberOfFrames: 960, numberOfChannels: 1, timestamp: Math.round(p / SR * 1e6), data: fr }); ae.encode(ad); ad.close(); }
+  await ae.flush();
+  if (!desc) { desc = new Uint8Array(19); desc.set(enc8('OpusHead')); const dv = new DataView(desc.buffer); desc[8] = 1; desc[9] = 1; dv.setUint16(10, 312, true); dv.setUint32(12, SR, true); }
+  // đóng gói
+  const info = el(0x1549A966, cat([eU(0x2AD7B1, 1000000), eS(0x4D80, 'meme-anime-lab'), eS(0x5741, 'meme-anime-lab'), eF(0x4489, DUR * 1000)]));
+  const tracks = el(0x1654AE6B, cat([
+    el(0xAE, cat([eU(0xD7, 1), eU(0x73C5, 1), eU(0x83, 1), eS(0x86, 'V_VP8'), el(0xE0, cat([eU(0xB0, W), eU(0xBA, H)]))])),
+    el(0xAE, cat([eU(0xD7, 2), eU(0x73C5, 2), eU(0x83, 2), eS(0x86, 'A_OPUS'), el(0x63A2, desc), el(0xE1, cat([eF(0xB5, SR), eU(0x9F, 1)]))]))]));
+  const all = [...vChunks, ...aChunks].sort((a, b) => a.ts - b.ts || a.tr - b.tr);
+  const clusters = []; let cur = null;
+  for (const b of all) {
+    if (!cur || (b.tr === 1 && b.key && b.ts - cur.t >= 500) || b.ts - cur.t > 30000) { cur = { t: Math.round(b.ts), blocks: [] }; clusters.push(cur); }
+    const rel = Math.round(b.ts) - cur.t, hdr = new Uint8Array(4); hdr[0] = 0x80 | b.tr; hdr[1] = (rel >> 8) & 255; hdr[2] = rel & 255; hdr[3] = b.key ? 0x80 : 0;
+    cur.blocks.push(el(0xA3, cat([hdr, b.d])));
+  }
+  const cBytes = clusters.map(cl => el(0x1F43B675, cat([eU(0xE7, cl.t), ...cl.blocks])));
+  const seekEntry = (id, pos) => el(0x4DBB, cat([el(0x53AB, idB(id)), eU(0x53AC, pos, 8)]));
+  const shLen = el(0x114D9B74, cat([seekEntry(0x1549A966, 0), seekEntry(0x1654AE6B, 0), seekEntry(0x1C53BB6B, 0)])).length;
+  let pos = shLen + info.length + tracks.length; const cuePts = [];
+  cBytes.forEach((cb, i) => { cuePts.push(el(0xBB, cat([eU(0xB3, clusters[i].t), el(0xB7, cat([eU(0xF7, 1), eU(0xF1, pos, 8)]))]))); pos += cb.length; });
+  const cues = el(0x1C53BB6B, cat(cuePts));
+  const seekHead = el(0x114D9B74, cat([seekEntry(0x1549A966, shLen), seekEntry(0x1654AE6B, shLen + info.length), seekEntry(0x1C53BB6B, pos)]));
+  const segment = el(0x18538067, cat([seekHead, info, tracks, ...cBytes, cues]));
+  const ebml = el(0x1A45DFA3, cat([eU(0x4286, 1), eU(0x42F7, 1), eU(0x42F2, 4), eU(0x42F3, 8), eS(0x4282, 'webm'), eU(0x4287, 2), eU(0x4285, 2)]));
+  const file = cat([ebml, segment]);
+  const r = await fetch('/save?p=videos/_test.webm', { method: 'POST', body: new Blob([file], { type: 'video/webm' }) });
+  window.__done = r.ok ? `OK ${file.length} byte · ${vChunks.length} khung hình · ${aChunks.length} gói tiếng` : 'ERR ' + r.status;
+})().catch(e => window.__done = 'ERR ' + (e && e.message || e));
+</script></body></html>

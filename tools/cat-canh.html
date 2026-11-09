@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="vi"><head><meta charset="utf-8"><title>Cắt cảnh</title>
+<style>body{background:#111;color:#ddd;font:13px/1.4 monospace;padding:12px}pre{white-space:pre-wrap}</style></head>
+<body><pre id="log">Cắt cảnh — chạy qua tools/hoc-clip.js (src, id, a, b, fps trên URL).
+</pre>
+<script>
+// Trang CẮT CẢNH của Meme Anime Lab. Chạy trong Edge/Chrome (kể cả chạy ngầm), máy chủ tools/serve.js.
+// URL: /tools/cat-canh.html?src=videos/x.mp4&id=<id>&a=<giây đầu>&b=<giây cuối>&fps=<khung/giây lấy mẫu>
+// Ra (POST lên máy chủ → clips/<id>/):
+//   sheet-NN.jpg  bảng khung theo nhịp fps (8 cột), vạch đỏ + "#n" = khung đầu cảnh mới, viền vàng "FLASH" = khung loé / impact
+//   shots-NN.jpg  mỗi cảnh 1 hàng: đầu / giữa / cuối + giây + độ dài
+//   audio-NN.png  độ to tiếng (dB) theo thời gian, 15s/hàng, vạch đỏ = cắt máy, vạch xanh = tiếng bật (onset)
+//   data.json     số liệu: khung (điểm khác biệt, độ sáng), cảnh, khung loé, tiếng 50 mẫu/giây + onset
+const P = new URLSearchParams(location.search);
+const SRC = P.get('src'), ID = P.get('id');
+let FPS = +P.get('fps') || 6, A = +P.get('a') || 0, B = P.get('b') ? +P.get('b') : null;
+const $log = document.getElementById('log'), log = s => { $log.textContent += s + '\n'; };
+const r2 = x => Math.round(x * 100) / 100, r1 = x => Math.round(x * 10) / 10;
+const fmt = t => { const m = Math.floor(t / 60), s = t - m * 60; return m + ':' + (s < 10 ? '0' : '') + s.toFixed(1); };
+const mk = (w, h) => { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; };
+const toBlob = (c, type = 'image/jpeg', q = 0.8) => new Promise(r => c.toBlob(r, type, q));
+async function save(name, body) {
+  if (typeof body === 'string') body = new Blob([body], { type: 'application/json' });
+  const r = await fetch('/save?p=' + encodeURIComponent(`clips/${ID}/${name}`), { method: 'POST', body });
+  if (!r.ok) throw new Error('save ' + name + ' ' + r.status);
+}
+const once = (el, ev, ms = 8000) => new Promise((res, rej) => { const to = setTimeout(() => rej(new Error('timeout ' + ev)), ms);
+  el.addEventListener(ev, function h() { clearTimeout(to); el.removeEventListener(ev, h); res(); }); });
+
+async function main() {
+  if (!SRC || !ID) { window.__done = 'ERR thiếu src / id'; return; }
+  // ---------- video ----------
+  const v = document.createElement('video'); v.muted = true; v.preload = 'auto'; v.playsInline = true; v.src = '/' + SRC.replace(/^\/+/, '');
+  await once(v, 'loadedmetadata', 20000);
+  let dur = v.duration;
+  if (!isFinite(dur)) { v.currentTime = 1e7; await once(v, 'seeked', 20000).catch(() => {}); dur = v.duration; }   // webm ghi bằng MediaRecorder không có độ dài
+  if (B == null || B > dur) B = dur; if (A < 0) A = 0;
+  const VW = v.videoWidth, VH = v.videoHeight;
+  let n = Math.floor((B - A) * FPS);
+  if (n > 900) { FPS = Math.max(1, Math.floor(900 / (B - A))); n = Math.floor((B - A) * FPS); log('đoạn dài → hạ fps còn ' + FPS); }
+  log(`video ${VW}x${VH} dài ${dur.toFixed(2)}s · đoạn ${A}–${B.toFixed(2)}s · ${FPS} khung/giây → ${n} khung`);
+  if (v.readyState < 2) await once(v, 'loadeddata', 20000).catch(() => {});   // chờ có hình (khung đầu từng ra màn đen → báo nhầm 1 cảnh 0.1s)
+  const seek = async t => { v.currentTime = t; await once(v, 'seeked', 10000);
+    if (v.requestVideoFrameCallback) await Promise.race([new Promise(r => v.requestVideoFrameCallback(() => r())), new Promise(r => setTimeout(r, 60))]); };
+
+  // ---------- bảng khung ----------
+  const TW = 192, TH = Math.round(TW * VH / VW), LH = 16, COLS = 8, ROWS = 12, PER = COLS * ROWS;
+  const sheets = [];
+  const SW = 32, SH = 18, small = mk(SW, SH), sx = small.getContext('2d', { willReadFrequently: true });
+  const frames = []; let prev = null, prev2 = null; const scores = [];
+  for (let k = 0; k < n; k++) {
+    const t = A + k / FPS; await seek(t);
+    sx.drawImage(v, 0, 0, SW, SH); const d = sx.getImageData(0, 0, SW, SH).data;
+    const lum = new Float32Array(SW * SH), hist = new Float32Array(16); let L = 0;
+    for (let i = 0; i < SW * SH; i++) { const y = (0.299 * d[i * 4] + 0.587 * d[i * 4 + 1] + 0.114 * d[i * 4 + 2]) / 255; lum[i] = y; L += y; hist[Math.min(15, y * 16 | 0)]++; }
+    L /= SW * SH; for (let i = 0; i < 16; i++) hist[i] /= SW * SH;
+    const cur = { d: new Uint8ClampedArray(d), hist, L };
+    let score = 0;
+    if (prev) { let md = 0; for (let i = 0; i < d.length; i += 4) md += Math.abs(d[i] - prev.d[i]) + Math.abs(d[i + 1] - prev.d[i + 1]) + Math.abs(d[i + 2] - prev.d[i + 2]);
+      md /= (SW * SH * 3 * 255); let hd = 0; for (let i = 0; i < 16; i++) hd += Math.abs(hist[i] - prev.hist[i]); hd /= 2; score = 0.5 * md + 0.5 * hd; }
+    const recent = scores.slice(-24).sort((a, b) => a - b), med = recent.length ? recent[recent.length >> 1] : 0;
+    const cut = k > 0 && score > Math.max(0.2, 3.2 * med);
+    frames.push({ t: r2(t), score: r2(score), luma: r2(L), cut, flash: false, back: prev2 });
+    scores.push(score); prev2 = prev; prev = cur;
+    // vẽ khung vào bảng
+    const si = Math.floor(k / PER), j = k % PER;
+    if (!sheets[si]) { const rows = Math.min(ROWS, Math.ceil((n - si * PER) / COLS)); const c = mk(COLS * TW, rows * (TH + LH)); const g = c.getContext('2d'); g.fillStyle = '#000'; g.fillRect(0, 0, c.width, c.height); sheets[si] = c; }
+    const g = sheets[si].getContext('2d'), x = (j % COLS) * TW, y = Math.floor(j / COLS) * (TH + LH);
+    g.drawImage(v, x, y + LH, TW, TH);
+    g.fillStyle = '#ddd'; g.font = '11px monospace'; g.fillText(fmt(t), x + 3, y + 12);
+    if (k % 30 === 0) log(`khung ${k}/${n}`);
+  }
+  // khung loé: 2 lần "cắt" liền nhau mà khung sau giống khung trước-nữa → là khung impact / loé, không phải cắt máy
+  //   (loé có thể dài 1–3 khung mẫu: cắt ở k, cắt lại ở k+m, khung k+m giống khung k-1, các khung giữa sáng/tối hẳn)
+  for (let k = 1; k < frames.length - 1; k++) {
+    if (!frames[k].cut) continue;
+    for (let m = 1; m <= 3 && k + m < frames.length; m++) {
+      if (!frames[k + m].cut) continue;
+      const a = frames[k - 1], c = frames[k + m], mid = frames.slice(k, k + m);
+      if (Math.abs(a.luma - c.luma) < 0.08 && mid.every(f => Math.abs(f.luma - a.luma) > 0.15)) { frames[k].cut = false; frames[k + m].cut = false; mid.forEach(f => f.flash = true); }
+      break;
+    }
+  }
+  frames.forEach(f => delete f.back);
+  // cảnh
+  const shots = []; let s0 = A;
+  for (let k = 1; k < frames.length; k++) if (frames[k].cut) { shots.push({ t0: s0, t1: frames[k].t }); s0 = frames[k].t; }
+  shots.push({ t0: s0, t1: B }); shots.forEach((s, i) => { s.n = i + 1; s.t0 = r2(s.t0); s.t1 = r2(s.t1); s.dur = r2(s.t1 - s.t0); });
+  // đánh dấu lên bảng khung
+  let shotNo = 1;
+  frames.forEach((f, k) => {
+    if (f.cut) shotNo++;
+    if (!(f.cut || f.flash || k === 0)) return;
+    const si = Math.floor(k / PER), j = k % PER, g = sheets[si].getContext('2d'), x = (j % COLS) * TW, y = Math.floor(j / COLS) * (TH + LH);
+    if (f.flash) { g.strokeStyle = '#ffd400'; g.lineWidth = 3; g.strokeRect(x + 1.5, y + LH + 1.5, TW - 3, TH - 3); g.fillStyle = '#ffd400'; g.font = 'bold 11px monospace'; g.fillText('FLASH', x + TW - 42, y + 12); }
+    else { g.fillStyle = '#ff2a2a'; g.fillRect(x, y + LH, 5, TH); g.font = 'bold 12px monospace'; g.fillText('#' + shotNo, x + TW - 34, y + 12); }
+  });
+  for (let i = 0; i < sheets.length; i++) await save(`sheet-${String(i + 1).padStart(2, '0')}.jpg`, await toBlob(sheets[i]));
+  log(`${shots.length} cảnh, ${frames.filter(f => f.flash).length} khung loé, ${sheets.length} bảng khung`);
+
+  // ---------- bảng cảnh: đầu / giữa / cuối ----------
+  const QW = 320, QH = Math.round(QW * VH / VW), LW = 150, PERS = 10;
+  for (let p = 0; p * PERS < shots.length; p++) {
+    const part = shots.slice(p * PERS, p * PERS + PERS), c = mk(LW + 3 * QW, part.length * (QH + 6)), g = c.getContext('2d');
+    g.fillStyle = '#000'; g.fillRect(0, 0, c.width, c.height);
+    for (let i = 0; i < part.length; i++) {
+      const s = part[i], y = i * (QH + 6), ts = [s.t0 + Math.min(0.04, s.dur / 4), (s.t0 + s.t1) / 2, Math.max(s.t0, s.t1 - Math.min(0.08, s.dur / 4))];
+      for (let q = 0; q < 3; q++) { await seek(Math.min(ts[q], dur - 0.01)); g.drawImage(v, LW + q * QW, y, QW, QH); }
+      g.fillStyle = '#fff'; g.font = 'bold 18px monospace'; g.fillText('#' + s.n, 10, y + 26);
+      g.font = '13px monospace'; g.fillStyle = '#ccc'; g.fillText(fmt(s.t0) + '–' + fmt(s.t1), 10, y + 48); g.fillText(s.dur.toFixed(2) + 's', 10, y + 66);
+    }
+    await save(`shots-${String(p + 1).padStart(2, '0')}.jpg`, await toBlob(c));
+  }
+
+  // ---------- tiếng ----------
+  let audio = null;
+  try {
+    const buf = await (await fetch('/' + SRC.replace(/^\/+/, ''))).arrayBuffer();
+    if (buf.byteLength > 450e6) throw new Error('file quá nặng để đọc tiếng');
+    const ac = new (window.AudioContext || window.webkitAudioContext)();
+    const ab = await ac.decodeAudioData(buf); ac.close();
+    const sr = ab.sampleRate, i0 = Math.floor(A * sr), i1 = Math.min(ab.length, Math.floor(B * sr)), HZ = 50, win = Math.floor(sr / HZ);
+    const chans = []; for (let c = 0; c < ab.numberOfChannels; c++) chans.push(ab.getChannelData(c));
+    const db = [];
+    for (let i = i0; i + win <= i1; i += win) { let s = 0; for (let j = i; j < i + win; j++) { let x = 0; for (const ch of chans) x += ch[j]; x /= chans.length; s += x * x; }
+      db.push(r1(Math.max(-80, 10 * Math.log10(s / win + 1e-12)))); }
+    const onsets = []; let last = -1e9;
+    for (let i = 5; i < db.length; i++) { const base = Math.max(...db.slice(i - 5, i)); if (db[i] > -42 && db[i] - base > 8 && i - last > 5) { onsets.push(r2(A + i / HZ)); last = i; } }
+    audio = { hz: HZ, from: A, db, onsets };
+    // hình độ to tiếng: 15s / hàng
+    const SEC = 15, W = 1500, RH = 120, rows = Math.max(1, Math.ceil((B - A) / SEC)), c = mk(W + 40, rows * (RH + 18)), g = c.getContext('2d');
+    g.fillStyle = '#0b0b0b'; g.fillRect(0, 0, c.width, c.height);
+    for (let r = 0; r < rows; r++) {
+      const y0 = r * (RH + 18) + 14, ta = A + r * SEC, X = t => 30 + (t - ta) / SEC * W;
+      g.strokeStyle = '#333'; g.lineWidth = 1; for (let dbl = -60; dbl <= 0; dbl += 20) { const yy = y0 + RH * (-dbl / 60); g.beginPath(); g.moveTo(30, yy); g.lineTo(30 + W, yy); g.stroke(); }
+      g.fillStyle = '#888'; g.font = '10px monospace';
+      for (let s = 0; s <= SEC; s++) { const t = ta + s; if (t > B) break; g.fillRect(X(t), y0 + RH, 1, 4); g.fillText(fmt(t), X(t) - 14, y0 - 3); }
+      g.strokeStyle = '#ff2a2a'; shots.slice(1).forEach(s => { if (s.t0 >= ta && s.t0 < ta + SEC) { g.beginPath(); g.moveTo(X(s.t0), y0); g.lineTo(X(s.t0), y0 + RH); g.stroke(); } });
+      g.strokeStyle = '#39a0ff'; onsets.forEach(t => { if (t >= ta && t < ta + SEC) { g.beginPath(); g.moveTo(X(t), y0 + RH - 18); g.lineTo(X(t), y0 + RH); g.stroke(); } });
+      g.strokeStyle = '#7dff9a'; g.beginPath(); let first = true;
+      for (let i = 0; i < db.length; i++) { const t = A + i / HZ; if (t < ta || t >= ta + SEC) continue; const yy = y0 + RH * Math.min(1, -db[i] / 60); if (first) { g.moveTo(X(t), yy); first = false; } else g.lineTo(X(t), yy); }
+      g.stroke();
+    }
+    await save('audio-01.png', await toBlob(c, 'image/png'));
+    log(`tiếng: ${onsets.length} tiếng bật`);
+  } catch (e) { log('không đọc được tiếng: ' + e.message); audio = { error: String(e.message) }; }
+
+  await save('data.json', JSON.stringify({ id: ID, src: SRC, a: A, b: r2(B), fps: FPS, video: { w: VW, h: VH, dur: r2(dur) }, shots,
+    flashes: frames.filter(f => f.flash).map(f => f.t), frames: frames.map(f => [f.t, f.score, f.luma]), frameCols: ['t', 'score', 'luma'], audio }, null, 0));
+  window.__done = `OK ${shots.length} cảnh · ${frames.length} khung · ${sheets.length} bảng khung · flash ${frames.filter(f => f.flash).length} · onset ${audio && audio.onsets ? audio.onsets.length : '-'}`;
+  log(window.__done);
+}
+main().catch(e => { window.__done = 'ERR ' + (e && e.message || e); log(window.__done); });
+</script></body></html>
