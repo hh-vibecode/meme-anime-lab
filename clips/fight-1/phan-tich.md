@@ -136,7 +136,7 @@ Máy dò ra 6 cảnh, thật ~12 shot: 1:55.2 rất xa (2 nhân vật nhỏ, n�
 Áp cho game (Gojo vs Pain, Final Part 1): Gojo xanh/tím vs Pain cam/đỏ; âm bản ở mỗi đòn; kết ấn đối xứng + bóng lá wipe; nổ toà nhà theo #2–#4;
 1 khoảng thở 1.5s sau mỗi vụ nổ lớn.
 
-## Đính chính máy dò
+## Đính chính máy dò (số # bên dưới là đánh số của BẢN CŨ 47 cảnh; bản mới 9/11 ra 86 cảnh + 5 âm bản, ~57/78 chỗ cắt đếm tay, ảnh shots-NN đã thay)
 - B5: máy tách 1 shot mặt Sukuna thành 6 cảnh (1:20.8–1:22.0) vì ánh chớp đổi độ sáng → thật là 1 shot 1.6s.
 - Gộp sai (thiếu cắt): #1 (1:00–1:04.7) thật 6 shot; #2 (1:04.7–1:07.9) thật 6 shot; #4, #9, #10, #17, #18, #21, #22, #34, #39, #42, #45 đều chứa
   2–5 shot — nét manga đen trắng + halftone làm điểm khác biệt giữa khung luôn cao, ngưỡng cắt bị đẩy lên. Bảng trên đếm bằng mắt.

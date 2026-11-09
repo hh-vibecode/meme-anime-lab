@@ -8,7 +8,8 @@ Code viết theo API THẬT của `chaos-battle-lab/js/cine-kit.js` (đã soát 
 sprite `{..., white, smear:{dx,dy,dz,n}, aura:{col,k,preset}}`, `K.twos(t)`, `K.seg/lerp/clamp/hash`, `K.EASE.{lin,eio,eout,ein,eout3,ein3}`.
 Phim 2D (kiểu `film-fin1.js` / `film-l2pro.js`: `shots:[{t0:0,t1:DUR,a:{}}]`, mỗi cảnh tự vẽ với `cam(g,cx,cy,z,rot)` riêng) dùng được hết phần
 `impact / shake / screen / post` bên dưới; phần `shots` chỉ áp cho phim 2.5D.
-Mục đánh dấu **CHƯA CÓ — việc chờ** = cine-kit chưa có hàm, phải tự vẽ trong phim hoặc gom vào `CineKit.cam.*` / `js/vfx-gl.js` (xem cuối file).
+**LÀM SẴN (9/11/2026):** `chaos-battle-lab/js/cine-cam.js` → `CineKit.cam.*` (playCineKit tự tải) — mục nào có dòng "→ đã có" thì GỌI HÀM, khỏi chép code mẫu.
+Mục đánh dấu **CHƯA CÓ — việc chờ** = chưa có hàm, phải tự vẽ trong phim hoặc dựng thêm trong `js/vfx-gl.js` (xem cuối file).
 
 Mẫu chung cho các mốc thời gian (dùng ở nhiều mục):
 ```js
@@ -19,6 +20,7 @@ const hit=(t,a,amp,d)=>(t>=a&&t<a+d)?amp*(1-(t-a)/d):0;      // rung tắt dần
 ---
 
 ## 1. Khung ÂM BẢN 1 khung lúc va chạm / chuyển cảnh
+→ đã có: `impact: CineKit.cam.negFrames([giây…], 0.07, 'inv', [đòn mạnh → 'red' rồi 'inv'])`.
 Mục đích: đánh dấu cú va chạm / cắt máy bằng 1 khung đen-trắng đảo màu thay cho loé trắng. Mắt thấy "giật", não đọc là "trúng".
 Nguồn: `clips/fight-1` 1:07.9, 1:08.9, 1:11.3, 1:12.0, 1:13.3, 1:14.0, 1:25.8, 1:26.5, 1:31.8, 1:37.4, 1:48.3, 1:49.0 (12 lần / 60s).
 Nhịp: dài 1 khung vẽ = ~1/12s (0.06–0.08s). Dày nhất 1 cái / 0.5–1s, trung bình 1 cái / 5s. Hay đặt NGAY ĐẦU shot mới (khung đầu), hoặc khung cuối shot trước.
@@ -30,6 +32,7 @@ shake:t=> Math.max(...NEG.map(a=>hit(t,a,10,0.4)), 0),
 ```
 
 ## 2. CO LẠI RỒI BÙNG (đếm ngược trước vụ nổ lớn)
+→ đã có: bước c `C.implode(F,t,T.c)` · bước d `C.negFrames([T.c+0.3])` · bước e–f `C.birdToWorm(T.e,{tx,tz})` (máy).
 Mục đích: cho khán giả "hít vào" trước khi nổ — năng lượng thu về 1 điểm rồi mới bung, nổ to gấp đôi cảm giác.
 Nguồn: `clips/fight-1` 1:12.9–1:15.9 (Hollow Purple vào toà nhà).
 Nhịp (tổng ~3s):
@@ -53,9 +56,10 @@ world(F,t){ K.smoke(F,{x:0,z:0,y:0,t0:T.e,n:26,spread:260,rise:180,life:1.6,size
   K.debris(F,{x:0,z:0,y:40,t0:T.e,n:30,speed:520,size:14,life:1.4,seed:3}); },
 post(F,t){ return {shocks:t>=T.e&&t<T.e+0.6?[{x:0,y:0,z:0,r:40+600*K.seg(t,T.e,T.e+0.6),w:40,str:26*(1-K.seg(t,T.e,T.e+0.6))}]:[]}; },
 ```
-Lửa đỏ-cam đặc kiểu manga (khối có viền) → **CHƯA CÓ**: `K.smoke` chỉ có khói mềm; tạm dùng `tint` nâu + `K.flash(F,a,'rgb(255,90,30)')` mờ.
+Lửa đỏ-cam đặc kiểu manga (khối có viền) → **đã có** `CineKitFx.blast(F,{x,y,z,t0,size:170})` (js/vfx-manga.js).
 
 ## 3. WIPE bằng MÀU / BÓNG / THÂN QUÁI / MẢNH VỠ (chuyển cảnh không cắt cứng)
+→ đã có: `C.wipeBlob(F,t,a,0.2,col)` · `C.wipeLeaves(F,t,a,0.2,{col,dir})` (thân quái lướt: đổi col + d) — cả 2 che kín đúng a + d/2 = chỗ cắt máy.
 Mục đích: nối 2 shot bằng 1 vật che kín khung trong 0.1–0.3s, vừa đổi cảnh vừa giữ đà.
 Nguồn:
 - Màu nhấn phủ kín 0.2s (vết loang tím tràn từ góc): `clips/fight-1` 1:04.5.
@@ -76,6 +80,7 @@ Bóng lá cây / thân quái lướt: dùng 1 ảnh tối (silhouette) vẽ tron
 Bóng lá đổ trên nền nâu (halftone) → **CHƯA CÓ** ảnh/hàm; tạm vẽ vài hình lá đen alpha 0.8 bằng path.
 
 ## 4. KẾT ẤN ĐỐI XỨNG + MẶT CHIA ĐÔI
+→ đã có: máy `C.mirror(t0,{A,B,cam,flip})` · mặt chia đôi `panels: t=>C.splitFace(t,a,1.0,camA,camB)` + `C.splitTint(F,t,a,1.0)` trong screen.
 Mục đích: 2 phe ra chiêu "soi gương" nhau → khán giả so sánh trực tiếp. Mỗi phe 1 MÀU riêng giữ suốt phim (Gojo xanh lam/tím, Sukuna đỏ).
 Nguồn: `clips/fight-1` 1:43.6–1:45.2 (A kết ấn 0.7s: chữ thập ngắm đỏ → xoáy đỏ · wipe bóng lá 0.2s · B cùng bố cục, chữ thập tím → xoáy xanh 0.7s);
 mặt chia đôi 1:24.0–1:25.0 (1.0s, nửa trái Sukuna nền đỏ, nửa phải Gojo nền xanh, vạch dọc giữa).
@@ -90,9 +95,10 @@ panels:t=> (t>=T.split&&t<T.split+1.0) ? [
 screen(F,t){ if(t>=T.split&&t<T.split+1.0){ const g=F.g; g.save(); g.globalCompositeOperation='multiply';
   g.fillStyle='rgba(255,60,50,0.35)'; g.fillRect(0,0,F.VW/2,F.VH); g.fillStyle='rgba(60,140,255,0.35)'; g.fillRect(F.VW/2,0,F.VW/2,F.VH); g.restore(); } },
 ```
-Chữ thập ngắm (2 vạch + vòng tròn) vẽ được bằng path trong `screen`. **XOÁY MÀU** sau lưng (vòng xoắn đỏ / xanh-hồng quay) → **CHƯA CÓ** — việc chờ cho `vfx-gl.js`.
+Chữ thập ngắm (2 vạch + vòng tròn) vẽ được bằng path trong `screen`. XOÁY MÀU sau lưng → **đã có** `CineKitFx.swirl(F,t,{colA:'255,30,40',colB:'90,170,255'})` — vẽ TRƯỚC nhân vật.
 
 ## 5. MATCH CUT đổi màu mắt (cùng bố cục mặt)
+→ đã có máy: `C.pushIn(t0,{d:1.6})` 2 lần cùng tham số (đổi mắt ở shot 2).
 Mục đích: báo "đổi phe / thức tỉnh" mà không cần thoại — giữ nguyên bố cục, chỉ đổi màu điểm sáng.
 Nguồn: `clips/fight-1` 1:20.8–1:24.0 — cận mặt mắt ĐỎ, máy đẩy vào rất chậm 1.6s (ánh sáng chớp liên tục) → nhoè 0.1s → cùng khung, mắt XANH 1.6s → mặt chia đôi (mục 4).
 ```js
@@ -105,6 +111,7 @@ screen(F,t){ if(Math.abs(t-(T.m+1.6))<0.05) K.flash(F,0.9,'#fff'); },   // nhoè
 Chớp sáng nền liên tục (máy dò tách sai thành 6 cảnh) = `K.flash(F, 0.15*hash(Math.floor(t*12)), '#cfe4ff')`.
 
 ## 6. ĐƯỜNG HẦM TỐC ĐỘ khi bị đánh văng xa
+→ đã có: `C.speedTunnel(F,t,a,0.8)` (zoom hậu kỳ vẫn tự thêm trong post nếu muốn).
 Mục đích: nối "trúng đòn" với "bay ra toàn cảnh thành phố" — 0.8s tia toả tâm + trắng dần, rồi cắt sang toàn cảnh sáng.
 Nguồn: `clips/fight-1` 1:28.8–1:29.6 (khung kính vỡ 0.5s trước đó → đường hầm 0.8s → toàn cảnh thành phố ban ngày 1.1s, toà nhà + người bay).
 ```js
@@ -116,6 +123,7 @@ post(F,t){ return (t>=T.tun&&t<T.tun+0.8)?{zoom:{sx:F.VW/2,sy:F.VH/2,k:1+0.4*K.s
 ```
 
 ## 7. TỈ LỆ NHẢY CỰC ĐOAN trong đánh tay đôi
+→ đã có máy: `C.scaleJump(t0,{tx,ty,tz,steps})` (mặc định đúng chuỗi fight-1 G) · `C.orbit(t0,{cut:0.15})` · `C.chargeFollow` · ease `brake`.
 Mục đích: combo cận chiến đọc rõ + có lực: xen RẤT XA (nhân vật nhỏ, nền trắng trống) với CỰC CẬN (nắm đấm che nửa khung).
 Nguồn: `clips/fight-1` 1:55.2–2:00.0 (fan-animation đen trắng). Chuỗi: xa 0.2 → cận mặt 0.2 → rất xa 0.8 → đối thủ lao 0.3 → nắm đấm che khung 0.3
 → đá cận + tia tốc độ 0.2 → combo máy XOAY quanh 2 người 1.0 → vật 0.8 → đập xuống: SMEAR DỌC 0.5 → đất vỡ 0.3.
@@ -128,9 +136,10 @@ shots:[ {t0:a,     t1:a+0.2, a:{tx:0,ty:80,dist:1400,pitch:8}},                 
         {t0:a+1.7, t1:a+2.7, a:{tx:0,ty:90,dist:320,yaw:-60},b:{yaw:60},ease:'lin'} ],   // xoay quanh lúc combo
 world(F,t){ K.sprite(F,{img:F.I.gojo,x:X(t),z:0,y:Y(t),h:100,smear:t>=T.slam&&t<T.slam+0.15?{dx:0,dy:120,dz:0,n:6}:null}); },
 ```
-`smear` của sprite chỉ là bóng mờ lặp theo vận tốc. SMEAR DỌC thật (ảnh kéo thành vệt sọc) → **CHƯA CÓ** — việc chờ "lưới biến dạng" trong `vfx-gl.js`.
+`smear` của sprite chỉ là bóng mờ lặp. SMEAR DỌC thật (ảnh kéo thành vệt sọc) → **đã có** `CineKitFx.smear(F,F.I.gojo,x,y,w,h,{dy:260})`.
 
 ## 8. BỘ BA GIỚI THIỆU QUÁI KHỔNG LỒ
+→ đã có máy: `C.slideAlong(t0,{ty,ty1})` → `C.wormHold(t0+2.75)` → cận mặt người (shot thường) · kaiju-b: `C.pushIn(t0,{d:2.9})`.
 Mục đích: cho thấy quái TO + đáng sợ trong 5–6s, không cần hiệu ứng.
 Nguồn A — `clips/kaiju-a` (Avengers): cực cận lướt dọc thân 2.75s → toàn cảnh GÓC GIUN, 2 toà nhà kẹp 2 mép, quái nhỏ trên trời, ĐỨNG YÊN 2.0s → cận mặt người ngước 0.25s+.
 Nguồn B — `clips/kaiju-b` (Cửu Vĩ): cận mặt + MẮT BẬT SÁNG 1.5s → toàn cảnh giữa 2 dãy nhà, trăng sau lưng, đẩy vào rất chậm 2.9s → dân chạy ở tiền cảnh 0.3s.
@@ -142,9 +151,10 @@ world(F,t){ K.sprite(F,{img:F.I.monster,x:0,z:600,y:250,h:900,shadow:false}); /*
 screen(F,t){ if(t<2.75) K.flash(F,0.25,'#fff'); K.vignette(F,0.6); },   // ngược sáng: khối tối + viền sáng
 ```
 Mắt bật sáng (B): sprite quái + 2 đốm glow đỏ hiện ở giây 0.7 của shot, `a` tăng trong 0.1s.
-Ngược sáng thật (quái thành khối tối có viền sáng) → tạm dùng `K.tinted` màu tối + aura trắng mảnh; làm đúng → **CHƯA CÓ** (rim light trong `vfx-gl.js`).
+Ngược sáng thật (quái thành khối tối có viền sáng) → **đã có** `CineKitFx.rimLight(F,F.I.friend,x,y,w,h,{col:'255,60,40'})` (bỏ `dir` = sáng bao quanh, `dir:-90` = sáng từ trên).
 
 ## 9. TĨNH TRƯỚC PHÁ + KẾT BẰNG HẬU QUẢ
+→ máy: shot thường (đứng yên, cùng tham số 2 shot); hậu quả `C.wormHold`/shot đứng yên 2.8s.
 Mục đích: cho thấy vật còn nguyên trong 1 nhịp ngắn → khán giả kịp "thương" nó → phá. Kết đoạn phá huỷ bằng shot hậu quả đứng yên dài để lắng.
 Nguồn: `clips/kaiju-b` 1:16.3 (tháp canh đứng trước trăng tròn, đứng yên 0.4s) → 1:16.7 đuôi quét qua, tháp gãy 1.1s (cùng máy) … 1:20.2–1:23.0 đống đổ nát, người nhỏ li ti, đứng yên 2.8s.
 ```js
@@ -156,6 +166,7 @@ shake:t=>hit(t,T.still+0.55,9,0.6),
 ```
 
 ## 10. KHOẢNG THỞ sau vụ nổ lớn
+→ đã có: `C.restBeat(F,t,a,1.5)` (nền nâu + bóng lá + viền tối; halftone vẫn chưa có).
 Mục đích: sau đỉnh cao trào phải có 1.4–1.6s TĨNH, tông trầm, không nhân vật rõ mặt → reset mắt người xem trước đoạn mới.
 Nguồn: `clips/fight-1` 1:15.9–1:17.3 (sau nổ Hollow Purple) và 1:38.2–1:39.7 (sau nổ đỏ): nền nâu sẫm + bóng lá cây đung đưa chậm, hạt halftone.
 Đoạn sau mở bằng shot đứng yên, nhân vật bình thản (giơ ngón cái / đứng nhìn) — tương phản với nổ.
@@ -165,18 +176,18 @@ screen(F,t){ if(t>=T.rest&&t<T.rest+1.5){ const g=F.g; K.flash(F,1,'#3a2a1e');
     g.beginPath(); g.ellipse(x,y,90+60*K.hash(s+2),22,K.hash(s+3)*3,0,Math.PI*2); g.fill(); }   // bóng lá
   K.vignette(F,0.7); } },
 ```
-Lớp halftone (chấm manga) trên nền → **CHƯA CÓ** — việc chờ (`post` shader).
+Lớp halftone → **đã có** `CineKitFx.halftone(F,{mode:'luma',dot:5,paper:'#f4f1ea'})`; đen trắng giữ 1 màu nhấn → `CineKitFx.mangaBW(F,{keep:'#2878ff'})` (gọi CUỐI `def.screen`).
 
 ---
 
-## Chưa có trong cine-kit — việc chờ (gom theo nơi nên dựng)
-| thiếu | dùng ở mục | nên dựng ở |
+## Hiệu ứng manga — `CineKitFx` (repo game `js/vfx-manga.js`, Ver 526, canvas 2D, chạy cả PC / Mac / xuất video offline)
+Trong file phim dùng `window.CineKitFx` (`CineKit.fx` gắn chậm ~20ms). Gọi trong `def.screen`; toạ độ = đơn vị logic của phim.
+| hàm | dùng ở mục | ms/khung 1280×720 (CPU, chậm nhất) |
 |---|---|---|
-| SMEAR DỌC thật (ảnh kéo thành vệt sọc khi đập / lao) | 7 | `vfx-gl.js` — lưới biến dạng ảnh 2D (đã có trong việc chờ CLAUDE.md) |
-| XOÁY MÀU sau lưng lúc kết ấn / mở lãnh địa | 4 | `vfx-gl.js` (shader xoáy, tham số màu A/B) |
-| LỚP HALFTONE / chấm manga + nền đen trắng 1 màu nhấn | 2, 10 | `def.post` → `vfx-gl.js` |
-| LỬA nổ khối đặc kiểu manga (viền đen, đỏ-cam) | 2 | thêm kiểu cho `K.smoke` hoặc hàm `K.blast` mới |
-| RIM LIGHT / ngược sáng cho quái | 8 | `vfx-gl.js` |
-| WIPE làm sẵn (loang màu, bóng lá, vật che) | 3, 10 | `CineKit.cam.wipe*` cùng bộ góc máy làm sẵn |
-| Bộ góc máy: lướt dọc thân, xoay quanh combo, lao vào máy fov rộng, góc giun đứng yên | 7, 8 | `CineKit.cam.*` (việc chờ CLAUDE.md) |
-| Nhịp: giữ → bật, co lại → bùng | 2 | bộ nhịp chuyển động (gom chung `CineKit.cam.*`) |
+| `smear(F,img,x,y,w,h,{dx,dy,n,streak,lines})` — vệt nhoè sọc khi đập / lao | 7 | 9.6 |
+| `swirl(F,t,{cx,cy,r,colA,colB,colC,arms,speed})` — xoáy màu kết ấn / lãnh địa | 4 | 11.8 |
+| `halftone(F,{mode:'flat' hoặc 'luma',dot,col,paper})` — chấm manga | 2, 10 | 9.6–14.3 |
+| `mangaBW(F,{keep,tol,scale})` — đen trắng, giữ 1 màu nhấn | 4 (C1/C3 fight-1) | 21.9 (`scale:0.25` → 16.5) |
+| `blast(F,{x,y,z,t0,life,size})` — lửa nổ khối đặc viền đen → khói nâu | 2 | 0.7 |
+| `rimLight(F,img,x,y,w,h,{col,dir,dark})` — quái ngược sáng | 8 | 11.2 |
+Chưa đo trên GPU thật; `mangaBW` nặng nhất → chỉ bật trong shot cần.

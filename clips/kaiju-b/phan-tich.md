@@ -34,5 +34,5 @@ Rút ra (→ đã ghi vào playbook/luat.md "Quái khổng lồ", "Phá huỷ di
 Áp cho Final Part 1 cảnh 2 (Friend phá thành phố): mở cận mặt Friend, mắt loé → toàn cảnh Friend giữa 2 toà nhà, trăng sau lưng →
 meme chạy ở tiền cảnh 0.3s → tháp / biển hiệu đứng yên 0.4s → bị quét gãy → kết bằng đống đổ nát đứng yên.
 
-Đính chính máy dò: máy chỉ tìm ra 2 cảnh (1:06.0 và 1:16.3). Thực tế là 14 cảnh — bảng màu tối, phẳng, 2 tông nên điểm khác biệt
+Đính chính máy dò: bản cũ chỉ tìm ra 2 cảnh (1:06.0 và 1:16.3); bản mới (9/11, tools/cat-quyet.js) ra 12 cảnh, sót 70.7 · 72.2 · 74.0 · 79.3 (mảnh vụn / chuyển chậm). Thực tế là 14 cảnh — bảng màu tối, phẳng, 2 tông nên điểm khác biệt
 giữa các khung thấp, ngưỡng không bắt được. Bảng trên đếm bằng mắt từ `sheet-01/02.jpg`, chỗ cắt chính xác ±0.1s.

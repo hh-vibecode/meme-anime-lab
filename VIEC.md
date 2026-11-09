@@ -16,7 +16,7 @@ Mac muốn xem lại video gốc: tải lại bằng yt-dlp theo `nguon` + `doan
 Công cụ (9/11):
 - `--yt "<link>"` tải YouTube không cần ffmpeg (hình ≤720p + tiếng m4a, 2 file), `--a/--b` nhận `1:47`.
 - Tiếng: ngoài `onset` (bật mạnh) có thêm `nhip` (tiếng bật trong nhạc to đều, dải cao, ngưỡng tự chỉnh) và `lang` (khoảng lặng giữa đoạn to).
-- `--test` luôn chạy 10 khung/giây. Đáp án: `OK 3 cảnh · 62 khung · 1 bảng khung · flash 2 · onset 3 · nhịp 3 · lặng 0`.
+- `--test` luôn chạy 10 khung/giây. Đáp án: `OK 3 cảnh · 62 khung · 1 bảng khung · flash 2 · âm bản 0 · onset 3 · nhịp 3 · lặng 0`.
 
 ## Mac — làm khi mở phiên lần đầu ở Mac
 1. `git pull` (repo này + `chaos-battle-lab` nằm cạnh).
@@ -24,12 +24,16 @@ Công cụ (9/11):
 3. Mac có yt-dlp + ffmpeg: nạp YouTube dùng `--yt` như PC (đã viết chạy cả 2 máy, nhưng CHƯA thử trên Mac), hoặc lệnh yt-dlp tải đoạn trong CLAUDE.md.
 4. Video gốc trên Mac để ở `videos/` trong repo (gitignore) — `serve.js` tự chọn.
 
+## Đã xong đợt công cụ 9/11 (PC)
+- [x] Máy dò chỗ cắt mới: độ giống CẤU TRÚC (`tools/cat-quyet.js`, chỉnh ngưỡng ngoài máy bằng Node) + dò khung ÂM BẢN (viền hồng). kaiju-b 2 → 12/14 cảnh.
+- [x] Repo game Ver 525 `js/cine-cam.js` → `CineKit.cam.*` (góc máy, nhịp holdSnap/overshoot/brake, implode, wipe, đường hầm, khoảng thở, chia đôi).
+- [x] Repo game Ver 526 `js/vfx-manga.js` → `CineKitFx` (smear, swirl, halftone, mangaBW, blast, rimLight).
+
 ## Việc còn mở
-- [ ] Máy dò chỗ cắt sai nhiều ở nét manga đen trắng / halftone (fight-1: gộp nhiều shot) và ở bảng màu tối phẳng (kaiju-b: chỉ ra 2/14 cảnh) →
-      cần ngưỡng tự chỉnh theo đoạn (như `nhip`), không dùng 1 ngưỡng cố định. Máy chưa bắt khung ÂM BẢN (đảo màu) — chỉ bắt loé sáng.
-- [ ] Bộ góc máy làm sẵn `CineKit.cam.*` + bộ nhịp chuyển động (hold → snap, vượt rồi bật lại) — số đã có trong `nhip.md`; dựng trong repo game.
-- [ ] Những thứ cine-kit chưa có (xem mục "chưa có" trong `cong-thuc.md`) — báo phiên game, KHÔNG sửa repo game từ đây.
-- [ ] Lưới biến dạng ảnh 2D (vfx-gl), mẫu ghi chú shot chặt hơn — xem CLAUDE.md "đang chờ".
+- [ ] CHƯA phim nào dùng `CineKit.cam` / `CineKitFx` — lần dựng đầu (đề xuất: làm lại Final Part 1 cảnh 2 Friend phá thành phố, rồi Gojo vs Pain cảnh 4–5) sẽ lộ lỗi.
+- [ ] Máy dò vẫn sót ở chỗ chuyển bằng mảnh vụn / nhoè và đoạn hỗn loạn (nổ, xoáy) — vẫn soát bằng mắt, ghi đính chính.
+- [ ] Hiệu ứng `CineKitFx` đo trên CPU 10–22 ms/khung — chưa đo GPU thật; trên Mac đo lại.
+- [ ] Lưới biến dạng ảnh 2D thật (dẹt / thở / nghiêng, WebGL) · mẫu ghi chú shot chặt hơn.
 - [ ] `clips/fight-2/` rỗng — hỏi anh còn muốn nạp đoạn nào.
 
 ## Nhật ký

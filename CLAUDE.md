@@ -21,12 +21,12 @@ Claude KHÔNG xem được video, KHÔNG nghe được tiếng → xem chuỗi K
 Anh hay gửi công cụ / add-on tìm trên mạng (Blender, Unity, AI xem video…). KHÔNG cài công cụ ngoài vào quy trình —
 xem nó làm được gì, lấy làm THAM KHẢO, rồi TỰ DỰNG LẠI bằng công cụ của mình (cine-kit trong trình duyệt, Node thuần, chạy được cả PC lẫn Mac).
 Tên công cụ AI liệt kê hay bị bịa → tra lại trước khi nói với anh.
-Việc đang chờ: bộ GÓC MÁY LÀM SẴN `CineKit.cam.*` (lia giật / whip pan, dolly zoom, lao theo đòn + khựng, xoay quanh lúc gồng chiêu…, ý từ add-on Cinepack của Blender)
-— dựng SAU khi học vài clip, chỉnh số theo nhịp anime thật (ghi vào `playbook/cong-thuc.md`).
-Cũng đang chờ (từ đợt tham khảo 9/11, tự dựng lại, không cài):
-- LƯỚI BIẾN DẠNG ảnh 2D (ý Stretchy Studio / Spine / Live2D): 1 ảnh tự dẹt khi tiếp đất, kéo dài theo hướng lao (smear thật), nghiêng, thở — WebGL trong `chaos-battle-lab/js/vfx-gl.js`.
-- BỘ NHỊP CHUYỂN ĐỘNG làm sẵn (ý AnimAide): giữ rồi bật (hold → snap), vượt quá rồi bật lại, hãm gấp — gom chung với `CineKit.cam.*`.
-- Mẫu ghi chú shot chặt hơn cho `phan-tich.md` (ý bộ dữ liệu AnimeShooter: nhân vật / góc máy / hành động mỗi shot).
+ĐÃ DỰNG (9/11, repo game, tự dựng lại từ các ý tham khảo — không cài công cụ ngoài):
+- `js/cine-cam.js` → `CineKit.cam.*`: góc máy làm sẵn (slideAlong, orbit, wormHold, birdToWorm, pushIn, whip, dollyZoom, chargeFollow, scaleJump, mirror),
+  nhịp chuyển động (`ease:'holdSnap'|'overshoot'|'brake'`), hiệu ứng nhịp (negFrames, implode, wipeBlob, wipeLeaves, speedTunnel, restBeat, splitFace). Ver 525.
+- `js/vfx-manga.js` → `CineKitFx`: smear thật, swirl, halftone, mangaBW, blast, rimLight (canvas 2D). Ver 526.
+- Cách dùng: skill `dung-phim` repo game mục "CineKit.cam" + `playbook/cong-thuc.md`. Số nhịp lấy từ `playbook/nhip.md`.
+Còn chờ: lưới biến dạng ảnh 2D THẬT (dẹt khi tiếp đất, thở, nghiêng — WebGL `vfx-gl.js`, phiên game) · mẫu ghi chú shot chặt hơn (ý AnimeShooter).
 Đã xem + bỏ: AnimationGPT (khung xương 3D, cần Linux + RTX 4090), GhibliGenerator (đá / cảnh Blender, 2022), Mocap-Anything / Motion2MixamoRig (cần xương 3D).
 
 ## Cấu trúc
@@ -52,7 +52,7 @@ Cũng đang chờ (từ đợt tham khảo 9/11, tự dựng lại, không cài)
    - `--a/--b` = giây đầu/cuối (bỏ trống = cả video) · `--fps` 6 cảnh thường, 10–12 đoạn đánh nhanh (>900 khung thì tự hạ) · chạy lại cùng `--id` = ghi đè ảnh cũ.
    - Mất ~1–3 phút cho 30s ở 10 khung/giây. Cổng: máy chủ 8790, trình duyệt ngầm 9466 (profile riêng `mal-browser-profile` trong thư mục tạm, KHÔNG đụng trình duyệt của phiên khác).
 3. **Claude xem**: Read `shots-NN.jpg` trước (toàn cục), rồi `sheet-NN.jpg` (chi tiết từng khung), `audio-01.png` (tiếng bật khớp khung nào).
-   Vạch ĐỎ + `#n` = khung đầu cảnh mới · viền VÀNG `FLASH` = khung loé / impact frame (không tính là cắt máy) · cột chữ = giây trong video gốc.
+   Vạch ĐỎ + `#n` = khung đầu cảnh mới · viền VÀNG `FLASH` = khung loé · viền HỒNG `ÂM BẢN` = khung đảo đen trắng (cả 2 không tính là cắt máy) · cột chữ = giây trong video gốc.
    `audio-01.png`: vạch xanh dài = tiếng bật mạnh (onset) · vạch xanh ngắn = nhịp (tiếng bật trong nhạc to đều) · dải vàng = khoảng lặng.
    ⚠️ Clip AMV / lồng nhạc (nhạc nền ghép đè lên phim) thì KHÔNG học tiếng — chỉ học HÌNH (anh dặn 9/11/2026). Chỉ học tiếng khi clip giữ âm thanh đánh nhau gốc.
    Máy dò chỗ cắt có thể nhầm ở đoạn máy lia cực nhanh / chớp liên tục → Claude soát lại bằng mắt, ghi đính chính trong `phan-tich.md`.
@@ -61,11 +61,15 @@ Cũng đang chờ (từ đợt tham khảo 9/11, tự dựng lại, không cài)
 
 ## Tự kiểm công cụ (bắt buộc lần đầu ở máy mới, hoặc sau khi sửa tools/)
 `... tools/hoc-clip.js --test` → tự tạo video 6s biết trước đáp án → `clips/_test/` (gitignore). ĐÚNG khi in:
-`OK 3 cảnh · 62 khung · 1 bảng khung · flash 2 · onset 3 · nhịp 3 · lặng 0` (cắt 2.0s + 4.0s, loé 3.0–3.1s, tiếng bật ~1.0 / 2.48 / 4.48s).
+`OK 3 cảnh · 62 khung · 1 bảng khung · flash 2 · âm bản 0 · onset 3 · nhịp 3 · lặng 0` (cắt 2.0s + 4.0s, loé 3.0–3.1s, tiếng bật ~1.0 / 2.48 / 4.48s).
 `--test` luôn chạy 10 khung/giây (bỏ qua `--fps`) để đáp án cố định.
 Dò lỗi 1 trang: `... tools/hoc-clip.js --page tools/<trang>.html` (in `window.__done`).
 
 ## Bài học khi dựng công cụ (PC 9/11) — đừng làm lại
+- Dò chỗ cắt: luật quyết định ở `tools/cat-quyet.js` (dùng chung trang + Node). Chỉnh ngưỡng NGOÀI MÁY không cần chạy lại video:
+  `node tools/cat-quyet.js clips/<id>/data.json <giây cắt đúng, phẩy cách> ['{"strAbs":0.15}']` → in đúng / sót / thừa. Ngưỡng hiện tại chỉnh trên
+  _test (2/2) · kaiju-b (12 cảnh / 14 đếm tay, 0 thừa) · fight-1 (~57/78, ~10 thừa — trước là 65/82 nhưng 25 thừa + 24 âm bản sai).
+  Anime vẽ 2–3 khung 1 hình → trong 1 cảnh độ giống cấu trúc c1 nhảy 1 ↔ 0.2–0.5; cắt thật c1 ≈ 0 và hình mới ổn định ngay 1–2 khung sau.
 - Edge chạy ngầm: `MediaRecorder` ghi ra **0 byte** → video thử phải mã hoá bằng **WebCodecs** (VP8 + Opus) rồi tự đóng gói WebM (`_test-video.html`). WebM tự ghép phải có Duration + Cues, không thì không tua được.
 - Khung đầu lấy trước sự kiện `loadeddata` ra màn đen → báo nhầm 1 cảnh 0.1s (đã sửa: chờ `loadeddata`).
 - Máy chủ phải hỗ trợ Range (video tua) và không sập khi file rỗng; lần chạy lỗi giữa chừng để sót trình duyệt giữ cổng 9466 → `hoc-clip.js` luôn `--stop` trước khi mở.
