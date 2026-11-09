@@ -29,6 +29,12 @@ Công cụ (9/11):
 - [x] Repo game Ver 525 `js/cine-cam.js` → `CineKit.cam.*` (góc máy, nhịp holdSnap/overshoot/brake, implode, wipe, đường hầm, khoảng thở, chia đôi).
 - [x] Repo game Ver 526 `js/vfx-manga.js` → `CineKitFx` (smear, swirl, halftone, mangaBW, blast, rimLight).
 
+## Dựng phim bằng playbook — đợt đầu (9/11, repo game Ver 527)
+- Final Part 1 nâng cấp theo kaiju-a/b + fight-1: thành phố đúng tỉ lệ (meme nhỏ, nhà to), Friend lộ diện bộ ba, ĐUÔI quật kiểu Cửu Vĩ, tĩnh trước phá, hậu quả;
+  nóc nhà hết vỡ mặt (bỏ thở từng ô), Rinnegan vẽ rõ; cảnh 4 Gojo vs Pain bản đầu (`js/film-fin1c4.js`, ảnh tạm — lệnh vẽ ở `prompts/fin1-gojo-pain.txt` repo game).
+- Soát khung phim: `tools/x/film-sheet.html?id=<id>&file=<file>` (repo game) qua `cdp.js` — LUÔN bọc `timeout 420`, kiểm ~10 phút/lần (9/11 treo 3 tiếng vì không kiểm).
+- Luật anh dặn khi dựng: xin ẢNH SỚM ngay từ kịch bản; meme NHỎ so với nhà; không cho từng ô ảnh cắt chữ nhật cử động riêng (xé mặt nhân vật).
+
 ## Việc còn mở
 - [ ] CHƯA phim nào dùng `CineKit.cam` / `CineKitFx` — lần dựng đầu (đề xuất: làm lại Final Part 1 cảnh 2 Friend phá thành phố, rồi Gojo vs Pain cảnh 4–5) sẽ lộ lỗi.
 - [ ] Máy dò vẫn sót ở chỗ chuyển bằng mảnh vụn / nhoè và đoạn hỗn loạn (nổ, xoáy) — vẫn soát bằng mắt, ghi đính chính.
