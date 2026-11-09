@@ -23,6 +23,11 @@ xem nó làm được gì, lấy làm THAM KHẢO, rồi TỰ DỰNG LẠI bằn
 Tên công cụ AI liệt kê hay bị bịa → tra lại trước khi nói với anh.
 Việc đang chờ: bộ GÓC MÁY LÀM SẴN `CineKit.cam.*` (lia giật / whip pan, dolly zoom, lao theo đòn + khựng, xoay quanh lúc gồng chiêu…, ý từ add-on Cinepack của Blender)
 — dựng SAU khi học vài clip, chỉnh số theo nhịp anime thật (ghi vào `playbook/cong-thuc.md`).
+Cũng đang chờ (từ đợt tham khảo 9/11, tự dựng lại, không cài):
+- LƯỚI BIẾN DẠNG ảnh 2D (ý Stretchy Studio / Spine / Live2D): 1 ảnh tự dẹt khi tiếp đất, kéo dài theo hướng lao (smear thật), nghiêng, thở — WebGL trong `chaos-battle-lab/js/vfx-gl.js`.
+- BỘ NHỊP CHUYỂN ĐỘNG làm sẵn (ý AnimAide): giữ rồi bật (hold → snap), vượt quá rồi bật lại, hãm gấp — gom chung với `CineKit.cam.*`.
+- Mẫu ghi chú shot chặt hơn cho `phan-tich.md` (ý bộ dữ liệu AnimeShooter: nhân vật / góc máy / hành động mỗi shot).
+Đã xem + bỏ: AnimationGPT (khung xương 3D, cần Linux + RTX 4090), GhibliGenerator (đá / cảnh Blender, 2022), Mocap-Anything / Motion2MixamoRig (cần xương 3D).
 
 ## Cấu trúc
 - `videos/`      VIDEO GỐC — chỉ nằm trên máy đã nạp, gitignore. Mỗi clip ghi máy đang giữ trong `clips/<id>/info.json` (`video_o_may`).
