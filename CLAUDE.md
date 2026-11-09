@@ -17,6 +17,13 @@ Claude KHÔNG tự học / không nhớ giữa các phiên — chỉ những gì
 Claude KHÔNG xem được video, KHÔNG nghe được tiếng → xem chuỗi KHUNG HÌNH + đường độ to tiếng; nội dung tiếng (thoại, kiểu nhạc) anh ghi chú lúc nạp (`--note`).
 Đã cân nhắc + bỏ (9/11): Gemini / ChatGPT xem video hộ (thêm tài khoản; Gemini mặc định chỉ ~1 khung/giây — thưa hơn mình), dịch vụ ngoài qua MCP (gửi video ra ngoài, tốn tiền).
 
+## Nguyên tắc công cụ (anh chốt 9/11/2026)
+Anh hay gửi công cụ / add-on tìm trên mạng (Blender, Unity, AI xem video…). KHÔNG cài công cụ ngoài vào quy trình —
+xem nó làm được gì, lấy làm THAM KHẢO, rồi TỰ DỰNG LẠI bằng công cụ của mình (cine-kit trong trình duyệt, Node thuần, chạy được cả PC lẫn Mac).
+Tên công cụ AI liệt kê hay bị bịa → tra lại trước khi nói với anh.
+Việc đang chờ: bộ GÓC MÁY LÀM SẴN `CineKit.cam.*` (lia giật / whip pan, dolly zoom, lao theo đòn + khựng, xoay quanh lúc gồng chiêu…, ý từ add-on Cinepack của Blender)
+— dựng SAU khi học vài clip, chỉnh số theo nhịp anime thật (ghi vào `playbook/cong-thuc.md`).
+
 ## Cấu trúc
 - `videos/`      VIDEO GỐC — chỉ nằm trên máy đã nạp, gitignore. Mỗi clip ghi máy đang giữ trong `clips/<id>/info.json` (`video_o_may`).
 - `clips/<id>/`  `info.json` (nguồn, đoạn, ghi chú của anh, máy giữ video) · `sheet-NN.jpg` (bảng khung) · `shots-NN.jpg` (đầu/giữa/cuối mỗi cảnh)
