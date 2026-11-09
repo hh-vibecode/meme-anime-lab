@@ -1,0 +1,9 @@
+# VIDEO GỐC chỉ để trên máy (mỗi máy giữ clip nó nạp) — KHÔNG đẩy lên GitHub
+videos/
+*.mp4
+*.mkv
+*.webm
+*.mov
+*.local.*
+.DS_Store
+Thumbs.db
