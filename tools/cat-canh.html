@@ -9,7 +9,7 @@
 // Ra (POST lên máy chủ → clips/<id>/):
 //   sheet-NN.jpg  bảng khung theo nhịp fps (8 cột), vạch đỏ + "#n" = khung đầu cảnh mới, viền vàng "FLASH" = khung loé / impact
 //   shots-NN.jpg  mỗi cảnh 1 hàng: đầu / giữa / cuối + giây + độ dài
-//   audio-NN.png  độ to tiếng (dB) theo thời gian, 15s/hàng, vạch đỏ = cắt máy, vạch xanh = tiếng bật (onset)
+//   audio-NN.png  độ to tiếng (dB) theo thời gian, 15s/hàng, vạch đỏ = cắt máy, vạch xanh = tiếng bật mạnh (onset), vạch xanh ngắn = nhịp (tiếng bật trong nhạc to đều), dải vàng = khoảng lặng
 //   data.json     số liệu: khung (điểm khác biệt, độ sáng), cảnh, khung loé, tiếng 50 mẫu/giây + onset
 const P = new URLSearchParams(location.search);
 const SRC = P.get('src'), ID = P.get('id');
@@ -115,18 +115,38 @@ async function main() {
   // ---------- tiếng ----------
   let audio = null;
   try {
-    const buf = await (await fetch('/' + SRC.replace(/^\/+/, ''))).arrayBuffer();
+    const buf = await (await fetch('/' + (P.get('aud') || SRC).replace(/^\/+/, ''))).arrayBuffer();   // aud = file tiếng riêng (tải YouTube không ffmpeg: hình + tiếng 2 file)
     if (buf.byteLength > 450e6) throw new Error('file quá nặng để đọc tiếng');
     const ac = new (window.AudioContext || window.webkitAudioContext)();
     const ab = await ac.decodeAudioData(buf); ac.close();
     const sr = ab.sampleRate, i0 = Math.floor(A * sr), i1 = Math.min(ab.length, Math.floor(B * sr)), HZ = 50, win = Math.floor(sr / HZ);
     const chans = []; for (let c = 0; c < ab.numberOfChannels; c++) chans.push(ab.getChannelData(c));
-    const db = [];
-    for (let i = i0; i + win <= i1; i += win) { let s = 0; for (let j = i; j < i + win; j++) { let x = 0; for (const ch of chans) x += ch[j]; x /= chans.length; s += x * x; }
-      db.push(r1(Math.max(-80, 10 * Math.log10(s / win + 1e-12)))); }
+    const db = [], hdb = [];   // hdb = độ to dải tần CAO (x[n]-x[n-1]) — trống / tiếng va chạm nổi rõ hơn trong nhạc bị nén to đều
+    let px = 0;
+    for (let i = i0; i + win <= i1; i += win) { let s = 0, h = 0; for (let j = i; j < i + win; j++) { let x = 0; for (const ch of chans) x += ch[j]; x /= chans.length; s += x * x; h += (x - px) * (x - px); px = x; }
+      db.push(r1(Math.max(-80, 10 * Math.log10(s / win + 1e-12)))); hdb.push(Math.max(-80, 10 * Math.log10(h / win + 1e-12))); }
+    // onsets = tiếng bật MẠNH (luật cũ, giữ để bài tự kiểm không đổi): to hơn 8dB so với 0.1s trước
     const onsets = []; let last = -1e9;
     for (let i = 5; i < db.length; i++) { const base = Math.max(...db.slice(i - 5, i)); if (db[i] > -42 && db[i] - base > 8 && i - last > 5) { onsets.push(r2(A + i / HZ)); last = i; } }
-    audio = { hz: HZ, from: A, db, onsets };
+    // nhip = tiếng bật trong nhạc to đều (AMV, nhạc nén): độ nhảy dải cao so với ngưỡng TỰ CHỈNH theo ±1s xung quanh (trung vị + 3·MAD, tối thiểu 4dB)
+    const med = a => { const s = a.slice().sort((x, y) => x - y); return s[s.length >> 1] || 0; };
+    const rise = hdb.map((v, i) => i < 3 ? 0 : v - Math.min(hdb[i - 1], hdb[i - 2], hdb[i - 3]));
+    const nhip = []; last = -1e9;
+    for (let i = 3; i < hdb.length; i++) {
+      const w = rise.slice(Math.max(0, i - HZ), i + HZ), m = med(w), mad = med(w.map(v => Math.abs(v - m)));
+      const pk = rise[i] >= rise[i - 1] && rise[i] >= (rise[i + 1] ?? -1e9);
+      if (pk && hdb[i] > -50 && rise[i] > Math.max(4, m + 3 * mad) && i - last > 6) { nhip.push(r2(A + i / HZ)); last = i; }
+    }
+    // lang = khoảng LẶNG giữa đoạn đang to (tụt ≥6dB dưới trung vị ±1s, kéo ≥0.1s) — hay đặt ngay trước đòn lớn; sau = tiếng bật đầu tiên trong 0.6s sau đó
+    const lang = [];
+    for (let i = 0; i < db.length;) {
+      const m = med(db.slice(Math.max(0, i - HZ), i + HZ));
+      if (m > -35 && db[i] < m - 6) { let j = i; while (j < db.length && db[j] < m - 6) j++;
+        if (j - i >= 5) { const t1 = A + j / HZ, sau = nhip.concat(onsets).filter(t => t >= t1 - 0.05 && t <= t1 + 0.6).sort((x, y) => x - y)[0];
+          lang.push({ t0: r2(A + i / HZ), t1: r2(t1), sau: sau ?? null }); }
+        i = j + 1; } else i++;
+    }
+    audio = { hz: HZ, from: A, db, onsets, nhip, lang };
     // hình độ to tiếng: 15s / hàng
     const SEC = 15, W = 1500, RH = 120, rows = Math.max(1, Math.ceil((B - A) / SEC)), c = mk(W + 40, rows * (RH + 18)), g = c.getContext('2d');
     g.fillStyle = '#0b0b0b'; g.fillRect(0, 0, c.width, c.height);
@@ -136,18 +156,20 @@ async function main() {
       g.fillStyle = '#888'; g.font = '10px monospace';
       for (let s = 0; s <= SEC; s++) { const t = ta + s; if (t > B) break; g.fillRect(X(t), y0 + RH, 1, 4); g.fillText(fmt(t), X(t) - 14, y0 - 3); }
       g.strokeStyle = '#ff2a2a'; shots.slice(1).forEach(s => { if (s.t0 >= ta && s.t0 < ta + SEC) { g.beginPath(); g.moveTo(X(s.t0), y0); g.lineTo(X(s.t0), y0 + RH); g.stroke(); } });
+      g.fillStyle = 'rgba(255,200,40,0.18)'; lang.forEach(L => { if (L.t1 > ta && L.t0 < ta + SEC) g.fillRect(X(Math.max(ta, L.t0)), y0, X(Math.min(ta + SEC, L.t1)) - X(Math.max(ta, L.t0)), RH); });
+      g.strokeStyle = '#1f6fb0'; nhip.forEach(t => { if (t >= ta && t < ta + SEC) { g.beginPath(); g.moveTo(X(t), y0 + RH - 9); g.lineTo(X(t), y0 + RH); g.stroke(); } });
       g.strokeStyle = '#39a0ff'; onsets.forEach(t => { if (t >= ta && t < ta + SEC) { g.beginPath(); g.moveTo(X(t), y0 + RH - 18); g.lineTo(X(t), y0 + RH); g.stroke(); } });
       g.strokeStyle = '#7dff9a'; g.beginPath(); let first = true;
       for (let i = 0; i < db.length; i++) { const t = A + i / HZ; if (t < ta || t >= ta + SEC) continue; const yy = y0 + RH * Math.min(1, -db[i] / 60); if (first) { g.moveTo(X(t), yy); first = false; } else g.lineTo(X(t), yy); }
       g.stroke();
     }
     await save('audio-01.png', await toBlob(c, 'image/png'));
-    log(`tiếng: ${onsets.length} tiếng bật`);
+    log(`tiếng: ${onsets.length} tiếng bật mạnh · ${nhip.length} nhịp · ${lang.length} khoảng lặng`);
   } catch (e) { log('không đọc được tiếng: ' + e.message); audio = { error: String(e.message) }; }
 
   await save('data.json', JSON.stringify({ id: ID, src: SRC, a: A, b: r2(B), fps: FPS, video: { w: VW, h: VH, dur: r2(dur) }, shots,
     flashes: frames.filter(f => f.flash).map(f => f.t), frames: frames.map(f => [f.t, f.score, f.luma]), frameCols: ['t', 'score', 'luma'], audio }, null, 0));
-  window.__done = `OK ${shots.length} cảnh · ${frames.length} khung · ${sheets.length} bảng khung · flash ${frames.filter(f => f.flash).length} · onset ${audio && audio.onsets ? audio.onsets.length : '-'}`;
+  window.__done = `OK ${shots.length} cảnh · ${frames.length} khung · ${sheets.length} bảng khung · flash ${frames.filter(f => f.flash).length} · onset ${audio && audio.onsets ? audio.onsets.length : '-'} · nhịp ${audio && audio.nhip ? audio.nhip.length : '-'} · lặng ${audio && audio.lang ? audio.lang.length : '-'}`;
   log(window.__done);
 }
 main().catch(e => { window.__done = 'ERR ' + (e && e.message || e); log(window.__done); });

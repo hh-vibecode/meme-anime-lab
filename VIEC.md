@@ -34,4 +34,4 @@ Công cụ (9/11):
 
 ## Nhật ký
 - 9/11 PC: dựng công cụ, nạp kaiju-a/b + fight-1, viết phân tích 3 clip + playbook (luat, cong-thuc, nhip); thêm nhịp/lặng cho tiếng.
-  Dọn: thư mục `0.van-phong-ao` cũ trên Desktop (chỉ còn thư mục rỗng); lịch Windows `vp-gui-usage` trỏ lại sang `D:\0.van-phong-ao\scripts\` (app Văn phòng ảo).
+  PC mất `~/.gitconfig` → đặt tên commit riêng cho repo này (`git config user.name hh-vibecode`, email noreply như các commit trước).

@@ -5,6 +5,8 @@
 // Thường không cần chạy tay: tools/hoc-clip.js tự bật / tắt.
 const http = require('http'), fs = require('fs'), path = require('path');
 const ROOT = path.resolve(__dirname, '..');
+// VIDEO GỐC: PC để ở D:/meme-anime-lab-videos (ổ C gần đầy, anh dặn 9/11/2026) · Mac / máy khác: <repo>/videos · đặt riêng: biến môi trường MAL_VIDEOS
+const VIDEOS = process.env.MAL_VIDEOS || (process.platform === 'win32' && fs.existsSync('D:/meme-anime-lab-videos') ? 'D:/meme-anime-lab-videos' : path.join(ROOT, 'videos'));
 const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.json': 'application/json', '.css': 'text/css',
   '.png': 'image/png', '.jpg': 'image/jpeg', '.webp': 'image/webp', '.mp4': 'video/mp4', '.m4v': 'video/mp4', '.webm': 'video/webm',
   '.mov': 'video/quicktime', '.mkv': 'video/x-matroska', '.mp3': 'audio/mpeg', '.wav': 'audio/wav', '.md': 'text/plain; charset=utf-8' };
@@ -12,6 +14,7 @@ const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; ch
 function safe(rel) {
   rel = decodeURIComponent(rel).replace(/\\/g, '/').replace(/^\/+/, '');
   if (rel.split('/').includes('..')) return null;
+  if (rel.startsWith('videos/')) return path.join(VIDEOS, rel.slice(7));   // /videos/... → thư mục video gốc của máy này
   return path.join(ROOT, rel);
 }
 
@@ -44,7 +47,7 @@ function start(port, cb) {
   srv.listen(port, '127.0.0.1', () => cb && cb(srv));
   return srv;
 }
-module.exports = { start, ROOT };
+module.exports = { start, ROOT, VIDEOS };
 if (require.main === module) {
   const i = process.argv.indexOf('--port'), port = i > 0 ? +process.argv[i + 1] : 8790;
   start(port, () => console.log(`http://127.0.0.1:${port}/  root=${ROOT}`));
