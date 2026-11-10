@@ -51,6 +51,11 @@ Công cụ (9/11):
 - Luật anh dặn khi dựng: xin ẢNH SỚM ngay từ kịch bản; meme NHỎ so với nhà; không cho từng ô ảnh cắt chữ nhật cử động riêng (xé mặt nhân vật).
 
 ## Việc còn mở
+- ⏸️ **ĐANG DỞ (10/11 tối, PC) — TRAILER 9:16 fin1tr dựng lại theo anh**: thứ tự mới = mọi người HOẢNG LOẠN → FRIEND LÓ RA → CHUỐI KHÓC (KHÔNG que kem) → thoại Mlem + Pain → 5 thẻ → logo. "Nhớ đảm bảo sound chuẩn."
+  Đã sửa trong repo game `js/film-fin1.js` (CHƯA commit, chỉ nằm ở PC): cờ `NOICE` (trailer ẩn que kem), EDL mới (d2 1.1s · d2a 0.45s · glimpse 0.9s · reveal+0.4 1.5s · roar 1.4s · cry+0.3 1.35s · thoại · thẻ · group 2.4s ≈ 20s),
+  nhạc trailer thêm fin_crowd (hoảng loạn) + cine_heart (Friend ló ra). Cú pháp OK. CHƯA soát hình / tiếng: `film-check.js fin1tr` báo "không có phim fin1tr"
+  (trailer nằm trong film-fin1.js, film-check chưa tìm đúng file) → sửa film-check / sfx-lint để nạp được fin1tr, rồi xem bảng khung (khung cắt dọc, cx/zoom đoạn đám đông),
+  soát tiếng từng đoạn (tiếng gầm 18.26 phải rơi cuối đoạn reveal; đoạn hoảng loạn có tiếng la hét), rồi mới release. Anh dặn tạm dừng, mai làm tiếp.
 - [ ] CHƯA phim nào dùng `CineKit.cam` / `CineKitFx` — lần dựng đầu (đề xuất: làm lại Final Part 1 cảnh 2 Friend phá thành phố, rồi Gojo vs Pain cảnh 4–5) sẽ lộ lỗi.
 - [ ] Máy dò vẫn sót ở chỗ chuyển bằng mảnh vụn / nhoè và đoạn hỗn loạn (nổ, xoáy) — vẫn soát bằng mắt, ghi đính chính.
 - [ ] Hiệu ứng `CineKitFx` đo trên CPU 10–22 ms/khung — chưa đo GPU thật; trên Mac đo lại.
