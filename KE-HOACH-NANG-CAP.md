@@ -30,6 +30,7 @@ Máy PC: i5-14400F · RAM 16GB · AMD RX 560 4GB · không Python / ffmpeg / nod
 ## Các bước (làm theo thứ tự; mỗi bước có "Xong khi")
 
 ### Bước 0 — Ghi luật mới về công cụ ngoài (5 phút) · thư mục `meme-anime-lab`
+✅ **XONG 10/11**: CLAUDE.md mục "Nguyên tắc công cụ" đã đổi.
 Anh cho phép (10/11): kéo công cụ / model / asset ngoài về dùng. Sửa mục "Nguyên tắc công cụ" trong `CLAUDE.md` (đang ghi "KHÔNG cài công cụ ngoài"):
 được dùng khi (a) đã MỞ trang gốc xác nhận có thật + còn bảo trì, (b) giấy phép cho dùng, (c) chạy được trên PC nêu trên hoặc ghi rõ "chỉ Mac",
 (d) để ở `D:\tools` (PC), không commit file nặng. **Xong khi:** CLAUDE.md đã sửa + push.
@@ -47,6 +48,7 @@ Việc: (1) khai `cast` cho từng cảnh (fin1c1–c3: `fr`, `cry`…; fin1c4: 
 **Xong khi:** sfx-lint fin1 = 0 lỗi phải sửa; lên bản.
 
 ### Bước 2 — Một lệnh soát phim, không treo · thư mục `chaos-battle-lab`
+✅ **XONG 10/11**: `tools/x/film-check.js` (thử fin1c4 4 mốc: 6s, thoát sạch, không sót trình duyệt); skill dung-phim bước 4 đã đổi sang lệnh này.
 Viết `tools/x/film-check.js <id> [--t mốc,…] [--step 0.5]`: tự bật `serve.js` cổng riêng → mở trình duyệt ngầm → chụp bảng khung qua `tools/x/film-sheet.html`
 → LUÔN tắt trình duyệt + máy chủ (kể cả khi lỗi, giới hạn cứng 4 phút) → chạy luôn sfx-lint → in đường dẫn ảnh + số lỗi. Mac + PC.
 **Xong khi:** `film-check.js fin1c4` trả về < 3 phút, không để sót tiến trình; ghi cách dùng vào skill dung-phim (thay đoạn hướng dẫn playwright cũ).

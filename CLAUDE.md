@@ -17,10 +17,12 @@ Claude KHÔNG tự học / không nhớ giữa các phiên — chỉ những gì
 Claude KHÔNG xem được video, KHÔNG nghe được tiếng → xem chuỗi KHUNG HÌNH + đường độ to tiếng; nội dung tiếng (thoại, kiểu nhạc) anh ghi chú lúc nạp (`--note`).
 Đã cân nhắc + bỏ (9/11): Gemini / ChatGPT xem video hộ (thêm tài khoản; Gemini mặc định chỉ ~1 khung/giây — thưa hơn mình), dịch vụ ngoài qua MCP (gửi video ra ngoài, tốn tiền).
 
-## Nguyên tắc công cụ (anh chốt 9/11/2026)
-Anh hay gửi công cụ / add-on tìm trên mạng (Blender, Unity, AI xem video…). KHÔNG cài công cụ ngoài vào quy trình —
-xem nó làm được gì, lấy làm THAM KHẢO, rồi TỰ DỰNG LẠI bằng công cụ của mình (cine-kit trong trình duyệt, Node thuần, chạy được cả PC lẫn Mac).
-Tên công cụ AI liệt kê hay bị bịa → tra lại trước khi nói với anh.
+## Nguyên tắc công cụ (anh chốt 9/11/2026, ĐỔI 10/11/2026)
+10/11 anh cho phép: KÉO công cụ / model / asset ngoài về DÙNG (không chỉ tham khảo) khi đủ 4 điều kiện:
+(a) đã MỞ trang gốc xác nhận có thật + còn bảo trì; (b) giấy phép cho dùng (video đăng YouTube); (c) chạy được trên PC (i5-14400F · RAM 16GB · AMD RX 560 4GB,
+không CUDA, không Python thật) — chạy trong trình duyệt (WASM / WebGL / WebGPU / ONNX) hoặc file chạy đơn (ncnn-vulkan…) — hoặc ghi rõ "chỉ Mac";
+(d) để ở `D:\tools` (PC) / ngoài repo; KHÔNG commit model / file nặng. Ghi mỗi công cụ đã kéo vào `KE-HOACH-NANG-CAP.md` (tên, link, giấy phép, chỗ cài).
+Thứ không đạt (c) thì vẫn chỉ THAM KHẢO rồi tự dựng lại như cũ. Tên công cụ AI liệt kê hay bị bịa → tra lại trước khi nói với anh.
 ĐÃ DỰNG (9/11, repo game, tự dựng lại từ các ý tham khảo — không cài công cụ ngoài):
 - `js/cine-cam.js` → `CineKit.cam.*`: góc máy làm sẵn (slideAlong, orbit, wormHold, birdToWorm, pushIn, whip, dollyZoom, chargeFollow, scaleJump, mirror),
   nhịp chuyển động (`ease:'holdSnap'|'overshoot'|'brake'`), hiệu ứng nhịp (negFrames, implode, wipeBlob, wipeLeaves, speedTunnel, restBeat, splitFace). Ver 525.
