@@ -92,9 +92,15 @@ Xem điều khoản dùng giọng trước khi chọn. Hoặc anh gửi clip g�
 Làm theo `VIEC.md` mục "Mac": `git pull`, `node tools/hoc-clip.js --test` (đáp án trong VIEC.md), chạy `film-check.js` cả 4 cảnh, đo ms/khung hiệu ứng, ghi kết quả vào VIEC.md.
 Sau đó mới xuất video khi anh bảo.
 
-### Bước 9 — Nâng máy học clip (làm sau cùng) · thư mục `meme-anime-lab`
-Máy dò cắt cảnh còn sót ở chuyển cảnh bằng mảnh vụn / nhoè. Ứng viên CHƯA KIỂM: TransNetV2 (có bản ONNX?), PySceneDetect (Python → Mac). Thêm mẫu ghi chú shot chặt hơn
-(nhân vật / góc máy / hành động) để nối thẳng sang `shotlist` của Bước 6.
+### Bước 9 — Nâng máy học clip · thư mục `meme-anime-lab` — XONG 10/11/2026 (PC)
+- (a) TransNetV2 chạy trong trình duyệt ngầm: `tools/tn.js` (onnxruntime-web 1.20.1 CDN jsdelivr) + `hoc-clip.js --tn [--tn-fps 25]` → cột `tn` trong data.json.
+  Model `elya5/transnetv2` (MIT, gốc soCzech/TransNetV2 MIT — đã mở 2 trang xác nhận) ở `D:	ools	ransnetv2	ransnetv2.onnx` (không commit). Không có model → như cũ.
+- (b) Đo (đáp án đếm tay, `cat-quyet.js`): kaiju-b 8/13 thừa 0 → 12/13 thừa 1 · fight-1 57/82 thừa 10 → 67/82 thừa 13. Luật = luật cũ HOẶC tn > 0.55
+  HOẶC (tn > 0.1 và c1 < 0.5 và hình mới ổn định), gộp cắt lệch 1 khung. Quét lại ngưỡng luật cũ: không hơn → giữ. `--test` vẫn đúng (cả khi --tn).
+  Giá: chậm ~9 phút / 60s clip (tua 25 khung/giây). Còn sót ở fight-1 (theo số liệu, chưa soát bằng mắt): đoạn âm bản liên tục 108–109s, nền trắng sáng 116–117s, 65.3 / 73.4–73.7 hỗn loạn.
+- (c) Mẫu bảng shot mới trong `playbook/README.md` dùng đúng trường shotlist repo game (`t0 t1 co goc hanhDong loai` + may / vfx / tieng / ghiChu, giá trị co / goc / loai
+  theo danh sách cố định) + `tools/phan-tich-to-shots.js` → JSON như `js/shots/fin1c4.json` (đọc được cả bảng kiểu cũ, báo "CẦN SOÁT").
+- Chưa làm: PySceneDetect (chỉ Mac) — không cần nữa.
 
 ## Công cụ ngoài ĐÃ KIỂM (agent mở trang gốc 10/11/2026 — dùng danh sách này, đừng tìm lại)
 DÙNG NGAY trên PC (trình duyệt / file chạy đơn):
@@ -110,10 +116,11 @@ DÙNG NGAY trên PC (trình duyệt / file chạy đơn):
 - **Effekseer** editor + **EffekseerForWebGL** (MIT, hiệu ứng mẫu CC0) — tia / hào quang / sóng chấn động; **three.quarks** (MIT) hạt bằng code.
 - **Real-ESRGAN ncnn-vulkan** (anime model, BSD-3) / **realcugan-ncnn-vulkan** (MIT) / **rife-ncnn-vulkan** (MIT) — exe Vulkan chạy được RX 560: làm nét ảnh GPT, nội suy khung (dùng ít).
 - **Mediabunny** github.com/Vanilagy/mediabunny (MPL-2.0) — đọc/ghi MP4/WebM trong trình duyệt (thay WebM tự ghép).
-Giữ ở máy, KHÔNG để repo: 効果音ラボ soundeffect-lab.info (miễn phí thương mại, cấm phân phối lại, cấm đăng ký Content ID).
-Hỏi anh: Sonniss GDC 2026 (chất lượng cao, nhưng giấy phép 2.0 cấm dùng "để phát triển AI").
+ĐÃ KÉO (Ver 547 game): **Kenney** Impact/Sci-fi/RPG (CC0, `D:	oolskenney-audio`) → 5 key `kn_*` · **効果音ラボ** soundeffect-lab.info (thương mại miễn phí, cấm phân phối lại / Content ID; FAQ: game trên GitHub lộ file KHÔNG tính là phân phối lại) → 12 key `se_*`, file gốc `D:	oolssoundeffect-lab`. Nghe lại bằng tai: se_whoosh_fast, se_teleport, se_collapse (máy tai gắn nhãn lạ). Chưa thêm vào js/asset-groups.js (split_assets.py — chạy trên Mac).
+Sonniss GDC 2026: anh cho dùng (10/11). Trang tải chặn Cloudflare → tải qua Chrome của anh (tiện ích Claude in Chrome, anh tự bấm xác nhận nếu hiện) → torrent + aria2 chọn nhóm (~2.5GB) → `D:	oolssonniss` → `tools/x/sonniss-index.js --stats`. CHƯA tải (Chrome chưa kết nối tiện ích).
 Chỉ Mac: PySceneDetect, Stable Audio Open Small (tạo SE từ chữ), Style-Bert-VITS2 / GPT-SoVITS.
-Thử: TransNetV2 bản ONNX cộng đồng (`elya5/transnetv2`, chưa ai kiểm) · Iki github.com/zeikar/iki (MIT, rig Live2D-kiểu do AI, rất mới).
+ĐÃ DÙNG (10/11): TransNetV2 ONNX `elya5/transnetv2` (MIT, 31MB, sha256 c4d54a68…) + onnxruntime-web 1.20.1 (MIT) — `D:	ools	ransnetv2`, Bước 9.
+Thử: Iki github.com/zeikar/iki (MIT, rig Live2D-kiểu do AI, rất mới).
 Tham khảo cách tổ chức: ViMax (HKUDS, MIT), FilmAgent/VideoClaw (MIT), Anime-Shooter (mẫu ghi chú shot).
 BỎ: ToonCrafter / FramePack / Wan2.2 (cần NVIDIA mạnh) · LivePortrait (chế độ động vật không chạy Mac) · Spine (trả phí) · DragonBones (ngừng) · BRIA RMBG (cấm thương mại) ·
 Kokoro (tiếng Nhật kém) · edge-tts (chưa rõ điều khoản) · YAMNet tfjs (không còn bản bảo trì) · three-pinata (không có giấy phép).

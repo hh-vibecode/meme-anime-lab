@@ -8,9 +8,12 @@
 // YouTube: --yt "<link>" thay cho <video> → tải 1 lần hình ≤720p H.264 + tiếng m4a thành 2 file (không cần ffmpeg) VIDEOS/yt-<mã video>.mp4/.m4a,
 //          cắt nhiều đoạn cùng 1 video thì chỉ tải lần đầu. yt-dlp: PC D:/tools/yt-dlp/yt-dlp.exe (+ deno.exe cạnh đó) · Mac: yt-dlp trong PATH.
 // --a / --b nhận giây (107) hoặc phút:giây (1:47).
+// --tn: thêm lượt TransNetV2 (model ngoài repo: PC D:/tools/transnetv2/transnetv2.onnx · Mac <repo>/models/transnetv2/) — không có model thì bỏ qua, chạy như cũ.
+//       --tn-fps 25 (mặc định) = số khung/giây đưa vào TransNetV2. Cần mạng lần đầu (onnxruntime-web từ CDN jsdelivr).
+// --port 8790 / --cdp-port 9466: đổi khi có phiên khác đang chạy (hồ sơ trình duyệt theo cổng).
 // --fps: 6 cho cảnh thường; 10–12 cho đoạn đánh nhanh (đoạn ngắn); >900 khung thì tự hạ fps.
 const fs = require('fs'), path = require('path'), os = require('os'), { spawn } = require('child_process');
-const { start, ROOT, VIDEOS } = require('./serve.js');
+const { start, ROOT, VIDEOS, TN_DIR } = require('./serve.js');
 const argv = process.argv.slice(2), opt = (k, d) => { const i = argv.indexOf(k); return i >= 0 ? argv[i + 1] : d; };
 const PORT = +opt('--port', 8790), CDP_PORT = +opt('--cdp-port', 9466);
 // Repo game nằm CẠNH repo này, tên có thể có tiền tố số để xếp lên đầu (Mac của anh: "1. chaos-battle-lab", PC: "chaos-battle-lab") → tìm theo đuôi tên
@@ -18,7 +21,7 @@ const GAME = (() => { const up = path.resolve(ROOT, '..'); let n = 'chaos-battle
   try { n = fs.readdirSync(up).find(d => d.replace(/^[\d.\s_-]+/, '') === 'chaos-battle-lab' && fs.existsSync(path.join(up, d, 'tools', 'x', 'cdp.js'))) || n; } catch (e) {}
   return path.join(up, n); })();
 const CDP = path.join(GAME, 'tools', 'x', 'cdp.js');
-const PROFILE = path.join(os.tmpdir(), 'mal-browser-profile');
+const PROFILE = path.join(os.tmpdir(), 'mal-browser-profile' + (CDP_PORT === 9466 ? '' : '-' + CDP_PORT));   // cổng riêng → hồ sơ riêng (--stop chỉ tắt trình duyệt của mình)
 const secs = v => v == null ? null : String(v).includes(':') ? String(v).split(':').reduce((a, x) => a * 60 + +x, 0) : +v;
 function ytdlp(url, out, fmt) {
   const exe = fs.existsSync('D:/tools/yt-dlp/yt-dlp.exe') ? 'D:/tools/yt-dlp/yt-dlp.exe' : 'yt-dlp', deno = 'D:/tools/yt-dlp/deno.exe';
@@ -75,8 +78,13 @@ async function inBrowser(pagePath, waitMin) {
     for (const f of fs.readdirSync(dir)) if (/^(sheet|shots|audio)-\d+\.(jpg|png)$/.test(f)) try { fs.unlinkSync(path.join(dir, f)); } catch (e) { console.log('(không xoá được ' + f + ' — ' + e.code + ', sẽ ghi đè)'); }   // chạy lại: xoá ảnh cũ (Windows: file đang mở xem có thể bị giữ)
     const FPS_ = test ? '10' : opt('--fps', '6');   // --test luôn 10 khung/giây (đáp án cố định)
     const q = new URLSearchParams({ src: rel, id, fps: FPS_ }); if (opt('--a')) q.set('a', secs(opt('--a'))); if (opt('--b')) q.set('b', secs(opt('--b'))); if (audio) q.set('aud', 'videos/' + path.relative(VIDEOS, audio).replace(/\\/g, '/'));
+    let tnMin = 0;
+    if (argv.includes('--tn')) {
+      if (fs.existsSync(path.join(TN_DIR, 'transnetv2.onnx'))) { q.set('tn', '1'); q.set('tnfps', opt('--tn-fps', '25')); tnMin = 2 + ((secs(opt('--b')) || 120) - (secs(opt('--a')) || 0)) / 20; }
+      else console.log('(--tn: không thấy ' + path.join(TN_DIR, 'transnetv2.onnx') + ' → chạy luật cũ)');
+    }
     const sizeMB = fs.statSync(abs).size / 1e6;
-    const r = await inBrowser('tools/cat-canh.html?' + q, Math.min(20, 2 + sizeMB / 20));
+    const r = await inBrowser('tools/cat-canh.html?' + q, Math.min(30, 2 + sizeMB / 20 + tnMin));
     const infoF = path.join(dir, 'info.json'), old = fs.existsSync(infoF) ? JSON.parse(fs.readFileSync(infoF, 'utf8')) : {};
     const info = Object.assign(old, {
       id, nguon: yt || opt('--url', old.nguon || path.basename(abs)), doan: { a: secs(opt('--a', 0)) || 0, b: opt('--b') ? secs(opt('--b')) : null }, fps: +FPS_,

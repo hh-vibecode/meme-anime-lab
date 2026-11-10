@@ -9,3 +9,7 @@ videos/
 Thumbs.db
 # kết quả chạy thử công cụ
 clips/_test/
+clips/_*/
+# model TransNetV2 (31MB, tải từ Hugging Face) — không đẩy lên GitHub
+models/
+*.onnx

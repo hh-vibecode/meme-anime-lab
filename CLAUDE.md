@@ -29,7 +29,8 @@ Kho tiếng Sonniss GDC 2026: anh cho DÙNG THOẢI MÁI (10/11 — anh làm phi
   nhịp chuyển động (`ease:'holdSnap'|'overshoot'|'brake'`), hiệu ứng nhịp (negFrames, implode, wipeBlob, wipeLeaves, speedTunnel, restBeat, splitFace). Ver 525.
 - `js/vfx-manga.js` → `CineKitFx`: smear thật, swirl, halftone, mangaBW, blast, rimLight (canvas 2D). Ver 526.
 - Cách dùng: skill `dung-phim` repo game mục "CineKit.cam" + `playbook/cong-thuc.md`. Số nhịp lấy từ `playbook/nhip.md`.
-Còn chờ: lưới biến dạng ảnh 2D THẬT (dẹt khi tiếp đất, thở, nghiêng — WebGL `vfx-gl.js`, phiên game) · mẫu ghi chú shot chặt hơn (ý AnimeShooter).
+Còn chờ: lưới biến dạng ảnh 2D THẬT (dẹt khi tiếp đất, thở, nghiêng — WebGL `vfx-gl.js`, phiên game).
+ĐÃ KÉO VỀ DÙNG (10/11, Bước 9): TransNetV2 (soCzech, MIT) bản ONNX `elya5/transnetv2` chạy bằng onnxruntime-web 1.20.1 (CDN jsdelivr) — xem "Cắt cảnh" `--tn`.
 Đã xem + bỏ: AnimationGPT (khung xương 3D, cần Linux + RTX 4090), GhibliGenerator (đá / cảnh Blender, 2022), Mocap-Anything / Motion2MixamoRig (cần xương 3D).
 
 ## Cấu trúc
@@ -37,7 +38,8 @@ Còn chờ: lưới biến dạng ảnh 2D THẬT (dẹt khi tiếp đất, th�
 - `clips/<id>/`  `info.json` (nguồn, đoạn, ghi chú của anh, máy giữ video) · `sheet-NN.jpg` (bảng khung) · `shots-NN.jpg` (đầu/giữa/cuối mỗi cảnh)
                  · `audio-01.png` (độ to tiếng) · `data.json` (số liệu) · `phan-tich.md` (Claude viết).
 - `playbook/`    SỔ TAY ĐẠO DIỄN gom từ mọi clip (đọc `playbook/README.md`).
-- `tools/`       `hoc-clip.js` (lệnh chính) · `cat-canh.html` (trang cắt cảnh) · `serve.js` (máy chủ, có Range + POST lưu) · `_test-video.html` (video thử).
+- `tools/`       `hoc-clip.js` (lệnh chính) · `cat-canh.html` (trang cắt cảnh) · `cat-quyet.js` (luật cắt) · `tn.js` (TransNetV2) · `serve.js` (máy chủ, có Range + POST lưu)
+                 · `_test-video.html` (video thử) · `phan-tich-to-shots.js` (bảng shot trong phan-tich.md → JSON shotlist repo game).
 
 ## Cách nạp 1 clip (Claude làm, anh chỉ cần đưa video + nói đoạn nào, học gì)
 1. **Lấy video vào `videos/`**
@@ -54,6 +56,10 @@ Còn chờ: lưới biến dạng ảnh 2D THẬT (dẹt khi tiếp đất, th�
      (PC không có node → `node.ps1` của repo game mượn Node của VS Code.)
    - `--a/--b` = giây đầu/cuối (bỏ trống = cả video) · `--fps` 6 cảnh thường, 10–12 đoạn đánh nhanh (>900 khung thì tự hạ) · chạy lại cùng `--id` = ghi đè ảnh cũ.
    - Mất ~1–3 phút cho 30s ở 10 khung/giây. Cổng: máy chủ 8790, trình duyệt ngầm 9466 (profile riêng `mal-browser-profile` trong thư mục tạm, KHÔNG đụng trình duyệt của phiên khác).
+     Phiên khác đang chạy → `--port 8771 --cdp-port 9471` (hồ sơ trình duyệt tự theo cổng: `mal-browser-profile-9471`).
+   - **`--tn` (NÊN BẬT, 10/11)**: thêm lượt TransNetV2 → cột `tn` (xác suất cắt) trong `data.json`, luật cắt dùng kèm → bắt thêm chỗ cắt bằng mảnh vụn / nhoè.
+     Cần model ngoài repo: PC `D:	ools	ransnetv2	ransnetv2.onnx` · Mac `<repo>/models/transnetv2/transnetv2.onnx` (tải: huggingface.co/elya5/transnetv2,
+     31MB, sha256 c4d54a68…a8e0c) + mạng (onnxruntime-web từ CDN). Không có model → tự chạy như cũ. CHẬM: tua 25 khung/giây ~0.2–0.35s/khung → ~9 phút cho 60s.
 3. **Claude xem**: Read `shots-NN.jpg` trước (toàn cục), rồi `sheet-NN.jpg` (chi tiết từng khung), `audio-01.png` (tiếng bật khớp khung nào).
    Vạch ĐỎ + `#n` = khung đầu cảnh mới · viền VÀNG `FLASH` = khung loé · viền HỒNG `ÂM BẢN` = khung đảo đen trắng (cả 2 không tính là cắt máy) · cột chữ = giây trong video gốc.
    `audio-01.png`: vạch xanh dài = tiếng bật mạnh (onset) · vạch xanh ngắn = nhịp (tiếng bật trong nhạc to đều) · dải vàng = khoảng lặng.
@@ -73,6 +79,14 @@ Dò lỗi 1 trang: `... tools/hoc-clip.js --page tools/<trang>.html` (in `window
   `node tools/cat-quyet.js clips/<id>/data.json <giây cắt đúng, phẩy cách> ['{"strAbs":0.15}']` → in đúng / sót / thừa. Ngưỡng hiện tại chỉnh trên
   _test (2/2) · kaiju-b (12 cảnh / 14 đếm tay, 0 thừa) · fight-1 (~57/78, ~10 thừa — trước là 65/82 nhưng 25 thừa + 24 âm bản sai).
   Anime vẽ 2–3 khung 1 hình → trong 1 cảnh độ giống cấu trúc c1 nhảy 1 ↔ 0.2–0.5; cắt thật c1 ≈ 0 và hình mới ổn định ngay 1–2 khung sau.
+  Lưới ngưỡng luật cũ (strAbs / strDrop / settle / colK) đã quét 10/11: không bộ nào hơn rõ → luật cũ đã hết đường, muốn hơn phải thêm tín hiệu (TransNetV2).
+- TransNetV2 (10/11, đo bằng đáp án đếm tay): kaiju-b 8/13 → **12/13** (thừa 0 → 1) · fight-1 57/82 → **67/82** (thừa 10 → 13). `--test` vẫn đúng đáp án cả khi bật `--tn`.
+  · Đưa vào 25 khung/giây (tua riêng). Thử đưa đúng 10 khung/giây của lượt chính (nhanh, 9s): KHÔNG bắt thêm được cảnh nào → bỏ. Model học ở ~25 khung/giây.
+  · Model báo ở khung CUỐI cảnh cũ → `tnOff: 1`; hay lệch ±1 khung so với luật cũ → gộp: chỗ cắt chỉ nhờ TN mà khung kề đã cắt thì bỏ (không thì sinh 2 cắt
+    liền nhau, luật khung loé ăn mất cả 2). Hình phẳng (video thử) TN ra đúng 0.50–0.51 cả đoạn = "không biết" → ngưỡng `tnHi` 0.55, không phải 0.5.
+  · Đầu ra ONNX là logit (tên "534" = single_frame — suy từ đỉnh nhọn ~0.9–1.0, "535" = many_hot) → tn.js tự sigmoid. Đầu vào float32 [1,100,27,48,3] giá trị 0–255.
+  · Chuỗi `tn.p` gốc lưu trong data.json → chỉnh tnHi / tnLo / tnC1 / tnOff ngoài máy bằng `cat-quyet.js` như ngưỡng cũ.
+  · clips/kaiju-b, fight-1 trong repo vẫn là bản chạy cũ (không tn — chạy lại sẽ đổi số shot so với phan-tich.md). Bản đo nằm ở `clips/_tn-*` (gitignore, chỉ PC).
 - Edge chạy ngầm: `MediaRecorder` ghi ra **0 byte** → video thử phải mã hoá bằng **WebCodecs** (VP8 + Opus) rồi tự đóng gói WebM (`_test-video.html`). WebM tự ghép phải có Duration + Cues, không thì không tua được.
 - Khung đầu lấy trước sự kiện `loadeddata` ra màn đen → báo nhầm 1 cảnh 0.1s (đã sửa: chờ `loadeddata`).
 - Máy chủ phải hỗ trợ Range (video tua) và không sập khi file rỗng; lần chạy lỗi giữa chừng để sót trình duyệt giữ cổng 9466 → `hoc-clip.js` luôn `--stop` trước khi mở.

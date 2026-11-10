@@ -12,7 +12,20 @@
     colStr: 0.6,                 // luật màu bị CHẶN khi cấu trúc vẫn giống (c1 ≥ colStr): chỉ đổi ánh sáng / chớp, cùng 1 shot (fight-1 mặt Sukuna 1:21)
     negMax: -0.2,                // âm bản: c1 < negMax (đảo ngược khung trước) VÀ khung sau lật về (c1 sau < negMax hoặc c2 sau > sameShot)
     sameShot: 0.5,               // khung sau âm bản mà c2 > sameShot → vẫn cảnh cũ (không phải cắt)
+    tnHi: 0.55, tnLo: 0.1, tnC1: 0.5,  // TransNetV2: cắt khi tn > tnHi (0.55 chứ không 0.5: hình phẳng như video thử ra đúng 0.50–0.51 = model "không biết"), HOẶC tn > tnLo mà cấu trúc cũng đổi (c1 < tnC1) và hình mới ổn định
+    tnOff: 1,                    // TransNetV2: khung TN j báo cắt → chỗ cắt ở tj + tnOff/tn.fps
   };
+  // TransNetV2 (tools/tn.js) chạy ở tn.fps (25) riêng → gán cho khung phân tích k xác suất lớn nhất của các khung TN có chỗ cắt rơi vào (t[k-1], t[k]]
+  //   (khung TN j báo cắt = chỗ cắt nằm ở tj + tnOff / tn.fps). Chỉnh tnOff ngoài máy được vì data.json giữ nguyên chuỗi tn.p.
+  function mapTn(frames, tn, fps, p) {
+    p = Object.assign({}, P, p || {}); if (!tn || !tn.p) return frames;
+    const dt = 1 / fps, eps = 1e-6;
+    frames.forEach((f, k) => { const lo = k ? frames[k - 1].t : f.t - dt; let m = 0;
+      for (let j = Math.max(0, Math.floor((lo - tn.from) * tn.fps) - 2); j < tn.p.length; j++) { const ct = tn.from + (j + p.tnOff) / tn.fps;
+        if (ct > f.t + eps) break; if (ct > lo + eps) m = Math.max(m, tn.p[j]); }
+      f.tn = Math.round(m * 1000) / 1000; });
+    return frames;
+  }
   const med = a => { if (!a.length) return 0; const s = a.slice().sort((x, y) => x - y); return s[s.length >> 1]; };
   function decide(frames, p) {
     p = Object.assign({}, P, p || {});
@@ -25,14 +38,23 @@
       const settled = !n1 || [n1, n2].some(x => x && (x.c1 == null || x.c1 > p.settle));
       const byCol = f.score > Math.max(p.colMin, p.colK * mc) && (f.c1 == null || f.c1 < p.colStr);
       const byStr = f.c1 != null && f.c1 < p.strAbs && mcc - f.c1 >= p.strDrop && f.score > p.strSc && settled;
+      const byTn = f.tn != null && (f.tn > p.tnHi || (f.tn > p.tnLo && f.c1 != null && f.c1 < p.tnC1 && settled));
       if (f.c1 != null && f.c1 < p.negMax && n1 && n1.c1 != null && (n1.c1 < p.negMax || (n1.c2 != null && n1.c2 > p.sameShot))) f.neg = true;
       // khung ngay sau âm bản: so với khung TRƯỚC âm bản (c2) — giống thì vẫn cảnh cũ
       const pv = frames[k - 1];
       if (pv.neg) f.cut = !(f.c2 != null && f.c2 > p.sameShot) && (f.c2 != null ? f.c2 < p.strAbs : byCol);
       else f.cut = byCol || byStr;
+      f.tnCut = !f.cut && !pv.neg && byTn;   // cắt CHỈ nhờ TransNetV2 → gộp với cắt kề bên ở lượt sau
       if (f.neg) f.cut = false;   // âm bản không tính là cắt máy
       sc.push(f.score); cs.push(f.c1 == null ? mcc : f.c1);
     }
+    // TransNetV2 lệch ±1 khung so với luật cũ (tn báo khung cuối cảnh cũ, đếm tay / luật cũ báo khung đầu cảnh mới) → 1 chỗ cắt chỉ giữ 1:
+    //   bỏ cắt-nhờ-TN nếu khung kề đã cắt theo luật cũ; 2 khung kề cùng cắt-nhờ-TN thì giữ khung tn cao hơn.
+    for (let k = 0; k < frames.length; k++) { const f = frames[k]; if (!f.tnCut) continue;
+      const a = frames[k - 1], b = frames[k + 1];
+      if ((a && a.cut) || (b && b.cut && !b.tnCut) || (b && b.tnCut && b.tn > f.tn)) continue;
+      if (!f.neg) f.cut = true; }
+    frames.forEach(f => delete f.tnCut);
     // khung loé (luật cũ): cắt ở k, cắt lại ở k+m (m ≤ 3), khung k+m giống khung k-1 về độ sáng, các khung giữa sáng / tối hẳn
     for (let k = 1; k < frames.length - 1; k++) {
       if (!frames[k].cut) continue;
@@ -45,7 +67,7 @@
     }
     return frames;
   }
-  const api = { P, decide };
+  const api = { P, decide, mapTn };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.CatQuyet = api;
 
   // ---- Node: chỉnh ngưỡng trên data.json đã lưu ----
@@ -53,8 +75,10 @@
     const fs = require('fs'), [file, truth, pj] = process.argv.slice(2);
     const D = JSON.parse(fs.readFileSync(file, 'utf8')), cols = D.frameCols;
     const fr = D.frames.map(r => Object.fromEntries(cols.map((c, i) => [c, r[i]])));
+    const pp = pj ? JSON.parse(pj) : null;
+    if (D.tn && D.tn.p) mapTn(fr, D.tn, D.fps, pp);   // tính lại cột tn theo tnOff (chỉnh được ngoài máy)
     if (fr[0].c1 === undefined) { console.error('data.json cũ (chưa có c1/c2) — chạy lại hoc-clip.js cho clip này'); process.exit(1); }
-    decide(fr, pj ? JSON.parse(pj) : null);
+    decide(fr, pp);
     const cuts = fr.filter(f => f.cut).map(f => f.t), negs = fr.filter(f => f.neg).map(f => f.t), fl = fr.filter(f => f.flash).map(f => f.t);
     console.log(`cắt ${cuts.length}: ${cuts.join(' ')}\nâm bản ${negs.length}: ${negs.join(' ')}\nloé ${fl.length}: ${fl.join(' ')}`);
     if (truth) { const T = truth.split(',').map(Number), near = (x, L) => L.some(y => Math.abs(x - y) <= 0.11);

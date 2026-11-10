@@ -4,15 +4,17 @@
 <body><pre id="log">Cắt cảnh — chạy qua tools/hoc-clip.js (src, id, a, b, fps trên URL).
 </pre>
 <script src="cat-quyet.js"></script>
+<script src="tn.js"></script>
 <script>
 // Trang CẮT CẢNH của Meme Anime Lab. Chạy trong Edge/Chrome (kể cả chạy ngầm), máy chủ tools/serve.js.
-// URL: /tools/cat-canh.html?src=videos/x.mp4&id=<id>&a=<giây đầu>&b=<giây cuối>&fps=<khung/giây lấy mẫu>
+// URL: /tools/cat-canh.html?src=videos/x.mp4&id=<id>&a=<giây đầu>&b=<giây cuối>&fps=<khung/giây lấy mẫu>[&tn=1&tnfps=25]
+//   tn=1: thêm 1 lượt TransNetV2 (tools/tn.js, model ở /tn-model/) → xác suất cắt từng khung, cột "tn" trong data.json, cat-quyet.js dùng kèm luật cũ
 // Ra (POST lên máy chủ → clips/<id>/):
 //   sheet-NN.jpg  bảng khung theo nhịp fps (8 cột), vạch đỏ + "#n" = khung đầu cảnh mới, viền vàng "FLASH" = khung loé / impact
 //   shots-NN.jpg  mỗi cảnh 1 hàng: đầu / giữa / cuối + giây + độ dài
 //   audio-NN.png  độ to tiếng (dB) theo thời gian, 15s/hàng, vạch đỏ = cắt máy, vạch xanh = tiếng bật mạnh (onset), vạch xanh ngắn = nhịp (tiếng bật trong nhạc to đều), dải vàng = khoảng lặng
 //   data.json     số liệu: khung (điểm khác biệt, độ sáng), cảnh, khung loé, tiếng 50 mẫu/giây + onset
-const P = new URLSearchParams(location.search);
+const P = new URLSearchParams(location.search), TNON = P.get('tn') === '1', TNFPS = +P.get('tnfps') || 25;
 const SRC = P.get('src'), ID = P.get('id');
 let FPS = +P.get('fps') || 6, A = +P.get('a') || 0, B = P.get('b') ? +P.get('b') : null;
 const $log = document.getElementById('log'), log = s => { $log.textContent += s + '\n'; };
@@ -56,8 +58,10 @@ async function main() {
     let s = 0; for (let i = 0; i < z.length; i++) { z[i] -= m; s += z[i] * z[i]; } s = Math.sqrt(s / z.length); if (s > 1e-6) for (let i = 0; i < z.length; i++) z[i] /= s; return { z, sd: s / 255 }; };
   const ncc = (a, b) => { if (!a || !b || a.sd < 0.03 || b.sd < 0.03) return null; let c = 0; for (let i = 0; i < a.z.length; i++) c += a.z[i] * b.z[i]; return c / a.z.length; };   // null = khung phẳng (trắng / đen xoá)
   const frames = []; let prev = null, prev2 = null;
+  const tnSame = TNON && Math.abs(TNFPS - FPS) < 1e-9, tf = [];   // tnfps = fps → lấy khung 48×27 cho TransNetV2 ngay trong lượt này (không tua lại)
   for (let k = 0; k < n; k++) {
     const t = A + k / FPS; await seek(t);
+    if (tnSame) tf.push(TN.grab(v));
     sx.drawImage(v, 0, 0, SW, SH); const d = sx.getImageData(0, 0, SW, SH).data;
     const hist = new Float32Array(16); let L = 0;
     for (let i = 0; i < SW * SH; i++) { const y = (0.299 * d[i * 4] + 0.587 * d[i * 4 + 1] + 0.114 * d[i * 4 + 2]) / 255; L += y; hist[Math.min(15, y * 16 | 0)]++; }
@@ -76,6 +80,20 @@ async function main() {
     g.drawImage(v, x, y + LH, TW, TH);
     g.fillStyle = '#ddd'; g.font = '11px monospace'; g.fillText(fmt(t), x + 3, y + 12);
     if (k % 30 === 0) log(`khung ${k}/${n}`);
+  }
+  // ---------- TransNetV2 (tuỳ chọn) ----------
+  let tn = null;
+  if (TNON) {
+    try {
+      const t0 = performance.now(), inf = await TN.load('/tn-model/transnetv2.onnx');
+      log('TransNetV2: model ' + JSON.stringify(inf));
+      const nt = tnSame ? 0 : Math.floor((B - A) * TNFPS);
+      for (let j = 0; j < nt; j++) { await seek(A + j / TNFPS); tf.push(TN.grab(v)); if (j % 100 === 0) log(`TransNetV2 khung ${j}/${nt}`); }
+      const r = await TN.predict(tf);
+      tn = { fps: TNFPS, from: A, model: inf, dtype: r.dtype, p: r.p.map(x => Math.round(x * 1000) / 1000), m: r.m.map(x => Math.round(x * 1000) / 1000), giay: r1((performance.now() - t0) / 1000) };
+      CatQuyet.mapTn(frames, tn, FPS);
+      log(`TransNetV2 xong ${tn.giay}s · ${tn.p.filter(x => x > 0.5).length} khung > 0.5`);
+    } catch (e) { log('TransNetV2 lỗi → chạy luật cũ: ' + (e && e.message || e)); tn = { error: String(e && e.message || e) }; }
   }
   CatQuyet.decide(frames);   // tools/cat-quyet.js: cắt máy / loé / âm bản (chỉnh ngưỡng ngoài máy bằng Node trên data.json)
   // cảnh
@@ -165,7 +183,7 @@ async function main() {
   } catch (e) { log('không đọc được tiếng: ' + e.message); audio = { error: String(e.message) }; }
 
   await save('data.json', JSON.stringify({ id: ID, src: SRC, a: A, b: r2(B), fps: FPS, video: { w: VW, h: VH, dur: r2(dur) }, shots,
-    flashes: frames.filter(f => f.flash).map(f => f.t), negs: frames.filter(f => f.neg).map(f => f.t), frames: frames.map(f => [f.t, f.score, f.luma, f.sd, f.c1, f.c2]), frameCols: ['t', 'score', 'luma', 'sd', 'c1', 'c2'], audio }, null, 0));
+    flashes: frames.filter(f => f.flash).map(f => f.t), negs: frames.filter(f => f.neg).map(f => f.t), frames: frames.map(f => [f.t, f.score, f.luma, f.sd, f.c1, f.c2, f.tn ?? null]), frameCols: ['t', 'score', 'luma', 'sd', 'c1', 'c2', 'tn'], audio, tn }, null, 0));
   window.__done = `OK ${shots.length} cảnh · ${frames.length} khung · ${sheets.length} bảng khung · flash ${frames.filter(f => f.flash).length} · âm bản ${frames.filter(f => f.neg).length} · onset ${audio && audio.onsets ? audio.onsets.length : '-'} · nhịp ${audio && audio.nhip ? audio.nhip.length : '-'} · lặng ${audio && audio.lang ? audio.lang.length : '-'}`;
   log(window.__done);
 }

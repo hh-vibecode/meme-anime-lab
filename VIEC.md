@@ -15,7 +15,7 @@ Xong việc: cập nhật file này → commit → push `main`. Đầu phiên: `
   Các trận lớn TÁCH khỏi tập vì chưa có cảnh nối; khi anh thêm cảnh nối mới ghép lại.
 - **Trận phụ (anh xử lý sau)**: yêu cầu đầy đủ ở repo game `prompts/fin1-fight-phu.md` — fin1f1 Chud+Mlem vs Doge+Clapping · fin1f2 Bat vs Pop+Huh · fin1f3 Ninja vs Berserk, 10–20s, signature move đúng game.
 - **Soát phim 1 lệnh** (repo game): `tools/x/film-check.js <id>` = bảng khung + sfx-lint (tiếng) + film-lint (nhịp, cần js/shots/<id>.json). Phải 0 lỗi trước khi báo anh.
-- Kế hoạch nâng cấp + công cụ ngoài đã kiểm: `KE-HOACH-NANG-CAP.md`. Đã xong Bước 0–7; còn Bước 8 (Mac), 9 (máy học clip).
+- Kế hoạch nâng cấp + công cụ ngoài đã kiểm: `KE-HOACH-NANG-CAP.md`. Đã xong Bước 0–7 + 9 (máy học clip: `--tn` TransNetV2, mẫu bảng shot mới, 10/11); còn Bước 8 (Mac).
 
 ## Trạng thái (cập nhật 9/11/2026, PC Windows)
 Đã học 3 clip, đã có phân tích + playbook:

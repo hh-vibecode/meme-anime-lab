@@ -7,14 +7,17 @@ const http = require('http'), fs = require('fs'), path = require('path');
 const ROOT = path.resolve(__dirname, '..');
 // VIDEO GỐC: PC để ở D:/meme-anime-lab-videos (ổ C gần đầy, anh dặn 9/11/2026) · Mac / máy khác: <repo>/videos · đặt riêng: biến môi trường MAL_VIDEOS
 const VIDEOS = process.env.MAL_VIDEOS || (process.platform === 'win32' && fs.existsSync('D:/meme-anime-lab-videos') ? 'D:/meme-anime-lab-videos' : path.join(ROOT, 'videos'));
+// MODEL TransNetV2 (tools/tn.js, tuỳ chọn --tn): KHÔNG để repo. PC: D:/tools/transnetv2 · Mac: <repo>/models/transnetv2 (gitignore) · đặt riêng: MAL_TN
+const TN_DIR = process.env.MAL_TN || (process.platform === 'win32' && fs.existsSync('D:/tools/transnetv2') ? 'D:/tools/transnetv2' : path.join(ROOT, 'models', 'transnetv2'));
 const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.json': 'application/json', '.css': 'text/css',
   '.png': 'image/png', '.jpg': 'image/jpeg', '.webp': 'image/webp', '.mp4': 'video/mp4', '.m4v': 'video/mp4', '.webm': 'video/webm',
-  '.mov': 'video/quicktime', '.mkv': 'video/x-matroska', '.mp3': 'audio/mpeg', '.wav': 'audio/wav', '.md': 'text/plain; charset=utf-8' };
+  '.mov': 'video/quicktime', '.mkv': 'video/x-matroska', '.mp3': 'audio/mpeg', '.wav': 'audio/wav', '.md': 'text/plain; charset=utf-8', '.onnx': 'application/octet-stream' };
 
 function safe(rel) {
   rel = decodeURIComponent(rel).replace(/\\/g, '/').replace(/^\/+/, '');
   if (rel.split('/').includes('..')) return null;
   if (rel.startsWith('videos/')) return path.join(VIDEOS, rel.slice(7));   // /videos/... → thư mục video gốc của máy này
+  if (rel.startsWith('tn-model/')) return path.join(TN_DIR, rel.slice(9));  // /tn-model/transnetv2.onnx → model ngoài repo
   return path.join(ROOT, rel);
 }
 
@@ -47,7 +50,7 @@ function start(port, cb) {
   srv.listen(port, '127.0.0.1', () => cb && cb(srv));
   return srv;
 }
-module.exports = { start, ROOT, VIDEOS };
+module.exports = { start, ROOT, VIDEOS, TN_DIR };
 if (require.main === module) {
   const i = process.argv.indexOf('--port'), port = i > 0 ? +process.argv[i + 1] : 8790;
   start(port, () => console.log(`http://127.0.0.1:${port}/  root=${ROOT}`));
