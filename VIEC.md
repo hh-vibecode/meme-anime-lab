@@ -3,6 +3,20 @@
 Phiên Claude mở trong `meme-anime-lab` = "luồng công cụ phim" (anh đặt 9/11/2026): nạp clip, phân tích, viết playbook, sửa tools/.
 Xong việc: cập nhật file này → commit → push `main`. Đầu phiên: `git pull`.
 
+
+## 📌 Quyết định của anh + trạng thái (10/11/2026) — đọc trước khi làm phim
+- **Âm thanh**: kho **Sonniss GDC 2026** — DÙNG THOẢI MÁI (anh là người làm phim, không phát triển AI). GIỮ TOÀN BỘ kho ở `D:	oolssonniss` (PC) để tận dụng lâu dài cho game + phim;
+  tìm bằng `tools/x/sonniss-index.js --find` (repo game). Tiếng chọn dùng → `assets/audio/sn_*.mp3` (tiền tố dùng chung). Mac chưa có kho → tải lại khi cần.
+- **Giọng Nhật tên chiêu**: VOICEVOX (`D:	oolsoicevox`, script `tools/x/voicevox.js`), giọng 玄野武宏 — mô tả video PHẢI ghi `VOICEVOX:玄野武宏`. Anh chưa nghe duyệt.
+- **Chữ trên màn hình CHỈ tiếng Anh**, không chữ Hán / Nhật, không tiêu đề / thẻ cuối / "TO BE CONTINUED" khi anh không yêu cầu. (Logo MEOWKATSUKI có chữ Hán theo mẫu anh gửi 5/11 — chờ anh quyết giữ / bỏ.)
+- **Meme giữ NGUYÊN form gốc**: đứng thẳng như ảnh gốc, KHÔNG tư thế 4 chân. Meme NHỎ so với nhà.
+- **Tự vẽ ảnh song song** khi dựng phim (skill ve-anh-gpt), không hỏi / không chờ anh. **Kiểm agent 5 phút / lần**, lệnh nền luôn có timeout.
+- **Menu Meme Cinema**: MEME LORE 2 → thư mục **Final · Part 1** (`__fin1` trong js/game.js) chứa: Story (fin1, 3 cảnh) · Fight Gojo vs Pain (fin1c4, phim riêng) · Trailer 9:16 (fin1tr, ~18s).
+  Các trận lớn TÁCH khỏi tập vì chưa có cảnh nối; khi anh thêm cảnh nối mới ghép lại.
+- **Trận phụ (anh xử lý sau)**: yêu cầu đầy đủ ở repo game `prompts/fin1-fight-phu.md` — fin1f1 Chud+Mlem vs Doge+Clapping · fin1f2 Bat vs Pop+Huh · fin1f3 Ninja vs Berserk, 10–20s, signature move đúng game.
+- **Soát phim 1 lệnh** (repo game): `tools/x/film-check.js <id>` = bảng khung + sfx-lint (tiếng) + film-lint (nhịp, cần js/shots/<id>.json). Phải 0 lỗi trước khi báo anh.
+- Kế hoạch nâng cấp + công cụ ngoài đã kiểm: `KE-HOACH-NANG-CAP.md`. Đã xong Bước 0–7; còn Bước 8 (Mac), 9 (máy học clip).
+
 ## Trạng thái (cập nhật 9/11/2026, PC Windows)
 Đã học 3 clip, đã có phân tích + playbook:
 | clip | nội dung | video gốc đang ở | phân tích |

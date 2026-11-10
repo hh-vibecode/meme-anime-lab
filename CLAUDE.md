@@ -22,7 +22,8 @@ Claude KHÔNG xem được video, KHÔNG nghe được tiếng → xem chuỗi K
 (a) đã MỞ trang gốc xác nhận có thật + còn bảo trì; (b) giấy phép cho dùng (video đăng YouTube); (c) chạy được trên PC (i5-14400F · RAM 16GB · AMD RX 560 4GB,
 không CUDA, không Python thật) — chạy trong trình duyệt (WASM / WebGL / WebGPU / ONNX) hoặc file chạy đơn (ncnn-vulkan…) — hoặc ghi rõ "chỉ Mac";
 (d) để ở `D:\tools` (PC) / ngoài repo; KHÔNG commit model / file nặng. Ghi mỗi công cụ đã kéo vào `KE-HOACH-NANG-CAP.md` (tên, link, giấy phép, chỗ cài).
-Thứ không đạt (c) thì vẫn chỉ THAM KHẢO rồi tự dựng lại như cũ. Tên công cụ AI liệt kê hay bị bịa → tra lại trước khi nói với anh.
+Thứ không đạt (c) thì vẫn chỉ THAM KHẢO rồi tự dựng lại như cũ.
+Kho tiếng Sonniss GDC 2026: anh cho DÙNG THOẢI MÁI (10/11 — anh làm phim, không phát triển AI), giữ toàn bộ kho ở `D:	oolssonniss`. Tên công cụ AI liệt kê hay bị bịa → tra lại trước khi nói với anh.
 ĐÃ DỰNG (9/11, repo game, tự dựng lại từ các ý tham khảo — không cài công cụ ngoài):
 - `js/cine-cam.js` → `CineKit.cam.*`: góc máy làm sẵn (slideAlong, orbit, wormHold, birdToWorm, pushIn, whip, dollyZoom, chargeFollow, scaleJump, mirror),
   nhịp chuyển động (`ease:'holdSnap'|'overshoot'|'brake'`), hiệu ứng nhịp (negFrames, implode, wipeBlob, wipeLeaves, speedTunnel, restBeat, splitFace). Ver 525.
