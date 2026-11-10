@@ -62,7 +62,7 @@ Viết `tools/x/film-check.js <id> [--t mốc,…] [--step 0.5]`: tự bật `se
 **Xong khi:** catalog phủ 100% file trong `assets/audio`; lint bắt được ví dụ `cine_drop` gắn nhãn không phải vật rơi.
 
 ### Bước 4 — Bối cảnh vẽ thay khối hộp · thư mục `chaos-battle-lab`
-✅ **XONG phần lớn 10/11** (Ver 540): phông FIN_BG_DAY/RED/RUIN/PURPLE + mặt tiền FIN_TEX_DAY/NIGHT (GPT vẽ, WebP); cảnh 4 dán mặt tiền + phông theo yaw; cảnh 1–2 phông xa. CÒN: cảnh 2 shot góc chim (scD5 ~13.6s) vẫn khối hộp; cảnh 1 dãy cửa hàng che gần hết trời.
+✅ **XONG phần lớn 10/11** (Ver 540): phông FIN_BG_DAY/RED/RUIN/PURPLE + mặt tiền FIN_TEX_DAY/NIGHT (GPT vẽ, WebP); cảnh 4 dán mặt tiền + phông theo yaw; cảnh 1–2 phông xa. Góc chim cảnh 2 (scD5) đã thay bằng phông FIN_BG_TOP (Ver 544). CÒN: cảnh 1 dãy cửa hàng che gần hết trời.
 Đọc: skill `ve-anh-gpt`, `../meme-anime-lab/playbook/luat.md`. Cách làm như anime thật: NỀN VẼ theo shot, tách lớp trượt lệch nhau (parallax).
 (a) Vẽ bằng GPT (`tools/x/gpt-image.sh --size 1536x1024`, không `--green`) bộ nền thành phố Final cùng 1 phong cách: ban ngày bình yên · trăng máu Friend · đang cháy ·
     đại lộ đổ nát · hố Shinra · bầu trời tím sau nổ; mỗi nền 3–4 lớp (trời / nhà xa / nhà gần / tiền cảnh) — vẽ từng lớp riêng hoặc tách lớp bằng tách nền.
