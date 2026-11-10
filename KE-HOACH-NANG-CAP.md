@@ -35,6 +35,8 @@ Anh cho phép (10/11): kéo công cụ / model / asset ngoài về dùng. Sửa 
 (d) để ở `D:\tools` (PC), không commit file nặng. **Xong khi:** CLAUDE.md đã sửa + push.
 
 ### Bước 1 — Sửa tiếng Final Part 1 cho sạch · thư mục `chaos-battle-lab`
+✅ **XONG 10/11** (repo game, sau Ver 538): sfx-lint fin1 = 0 lỗi, còn 5 lưu ý lặp tiếng chung (l2p_whoosh ×7, ep3_whoosh ×7, cine_deep_impact ×7, l2p_explode ×4, vine_boom ×5 cố ý).
+   Logo Meowkatsuki (chữ Hán 零青白… và 猫) đang GIỮ, ghi `lint-ok: cjk` — CHỜ ANH quyết giữ hay bỏ. Chưa nghe thử bằng tai: anh nghe lại khi xem.
 Đọc: `.claude/skills/tim-sound/SKILL.md`, mục sfx trong `.claude/skills/dung-phim/SKILL.md`, chú thích đầu `tools/x/sfx-lint.js`.
 Chạy: `powershell -NoProfile -ExecutionPolicy Bypass -File tools/node.ps1 tools/x/sfx-lint.js fin1 --out <scratchpad>/fin1-sfx.md` rồi đọc báo cáo.
 Việc: (1) khai `cast` cho từng cảnh (fin1c1–c3: `fr`, `cry`…; fin1c4: `mw`, `mewing`, `ps`, `dp`); (2) thêm NHÃN thứ 5 cho mọi dòng sfx (việc đang xảy ra trên hình);
