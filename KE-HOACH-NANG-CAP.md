@@ -54,6 +54,7 @@ Viết `tools/x/film-check.js <id> [--t mốc,…] [--step 0.5]`: tự bật `se
 **Xong khi:** `film-check.js fin1c4` trả về < 3 phút, không để sót tiến trình; ghi cách dùng vào skill dung-phim (thay đoạn hướng dẫn playwright cũ).
 
 ### Bước 3 — Danh mục tiếng + "tai máy" · thư mục `chaos-battle-lab`
+✅ **XONG 10/11** (Ver 540): `tools/x/sfx-catalog.js` (→ sfx-catalog.json, `--find`), `tools/x/sfx-tag.js` + `sfx-tag.html` (AST AudioSet qua transformers.js, chạy trình duyệt; `--port` riêng khi chạy song song). sfx-lint báo 🎯 lệch nghĩa + 🗣️ có giọng. Lượt gắn nhãn cả kho đang/đã chạy — kiểm `tai` trong catalog.
 (a) `tools/x/sfx-catalog.js` → `assets/audio/catalog.json`: mỗi key: file, độ dài, mô tả (lấy từ chú thích AUDIO_SAMPLES; thiếu thì điền), loại (va chạm / vút / nổ / rung / giọng / nhạc / nền),
     của nhân vật nào, đang dùng ở phim nào. (b) Tai máy: model phân loại âm thanh chạy trong trình duyệt ngầm, gắn 3 nhãn + % cho từng file, ghi vào catalog
     (ứng viên CHƯA KIỂM: CLAP zero-shot qua transformers.js; YAMNet tfjs; Whisper qua transformers.js để đọc giọng nói gì — phải mở trang gốc xác nhận trước).
@@ -61,6 +62,7 @@ Viết `tools/x/film-check.js <id> [--t mốc,…] [--step 0.5]`: tự bật `se
 **Xong khi:** catalog phủ 100% file trong `assets/audio`; lint bắt được ví dụ `cine_drop` gắn nhãn không phải vật rơi.
 
 ### Bước 4 — Bối cảnh vẽ thay khối hộp · thư mục `chaos-battle-lab`
+✅ **XONG phần lớn 10/11** (Ver 540): phông FIN_BG_DAY/RED/RUIN/PURPLE + mặt tiền FIN_TEX_DAY/NIGHT (GPT vẽ, WebP); cảnh 4 dán mặt tiền + phông theo yaw; cảnh 1–2 phông xa. CÒN: cảnh 2 shot góc chim (scD5 ~13.6s) vẫn khối hộp; cảnh 1 dãy cửa hàng che gần hết trời.
 Đọc: skill `ve-anh-gpt`, `../meme-anime-lab/playbook/luat.md`. Cách làm như anime thật: NỀN VẼ theo shot, tách lớp trượt lệch nhau (parallax).
 (a) Vẽ bằng GPT (`tools/x/gpt-image.sh --size 1536x1024`, không `--green`) bộ nền thành phố Final cùng 1 phong cách: ban ngày bình yên · trăng máu Friend · đang cháy ·
     đại lộ đổ nát · hố Shinra · bầu trời tím sau nổ; mỗi nền 3–4 lớp (trời / nhà xa / nhà gần / tiền cảnh) — vẽ từng lớp riêng hoặc tách lớp bằng tách nền.
@@ -70,16 +72,19 @@ Viết `tools/x/film-check.js <id> [--t mốc,…] [--step 0.5]`: tự bật `se
 **Xong khi:** anh xem bảng khung cảnh 4 và duyệt nền; không còn shot nào thấy khối hộp trơn.
 
 ### Bước 5 — Nhân vật có sức sống · thư mục `chaos-battle-lab`
+✅ **XONG (a) 10/11**: `K.sprite({life:{breath,sway,wind,squash,stretch}})` + `K.squash()` trong cine-kit (lưới tam giác, ~2ms/khung), mặc định nhẹ cho mọi sprite. CÒN: (b) sprite sheet đòn đánh; aura chưa theo hình đã biến dạng.
 (a) Lưới biến dạng ảnh 2D trong `js/vfx-gl.js` (việc chờ từ 9/11): thở, nghiêng, dẹt khi tiếp đất, áo / đuôi phất theo gió — áp cho mọi sprite qua 1 tham số.
 (b) Hành động chính (đấm, bay, kết ấn): xin GPT sprite sheet 3–4 khung, phát 12 hình/giây. (c) Không cắt ảnh thành ô chữ nhật cho cử động riêng (làm vỡ mặt — anh chê 9/11).
 **Xong khi:** shot đứng yên nào nhân vật cũng có chuyển động nhỏ; 1 đòn đánh mẫu chạy bằng sprite sheet.
 
 ### Bước 6 — Bảng phân cảnh thành DỮ LIỆU + tự soát nhịp · thư mục `chaos-battle-lab`
+✅ **XONG 10/11**: `js/shots/<id>.json` + `tools/x/film-lint.js`, film-check chạy cả 3 lint. fin1c4 film-lint 0 lỗi.
 Mỗi phim khai `shotlist:[{t0,t1,co,goc,hanhDong,anh:[…],sfx:[…],nhac}]`. Từ đó: sinh danh sách ảnh cần vẽ (tự vẽ nền song song theo skill), sinh khung lịch tiếng có nhãn,
 và `film-lint` soát theo `../meme-anime-lab/playbook/nhip.md`: shot đánh 0.2–0.9s, khoảng thở 1.4–1.6s sau nổ lớn, không shot tĩnh > 3s, ≥ 3 cỡ cảnh / 10s, khung âm bản ở mỗi va chạm.
 **Xong khi:** `film-check.js` chạy cả film-lint; Final 1 cảnh 4 có shotlist và qua lint.
 
 ### Bước 7 — Giọng Nhật đọc tên chiêu
+✅ **XONG 10/11**: VOICEVOX ở `D:	oolsoicevox` (directml), giọng 玄野武宏 — mô tả video PHẢI ghi `VOICEVOX:玄野武宏`. Key mw_ryoiki_tenkai / mw_muryokusho / mw_murasaki; script `tools/x/voicevox.js`. Anh chưa nghe duyệt.
 Cần cho: "Ryōiki Tenkai — Muryōkūsho", Hollow Purple, Almighty Push. Ứng viên CHƯA KIỂM: VOICEVOX (máy chủ nội bộ, chạy CPU), edge-tts, Style-Bert-VITS2 (cần Python → Mac).
 Xem điều khoản dùng giọng trước khi chọn. Hoặc anh gửi clip gốc → cắt theo skill tim-sound. **Xong khi:** mỗi tên chiêu có 1 file giọng, khai trong catalog.
 
@@ -113,6 +118,10 @@ Tham khảo cách tổ chức: ViMax (HKUDS, MIT), FilmAgent/VideoClaw (MIT), An
 BỎ: ToonCrafter / FramePack / Wan2.2 (cần NVIDIA mạnh) · LivePortrait (chế độ động vật không chạy Mac) · Spine (trả phí) · DragonBones (ngừng) · BRIA RMBG (cấm thương mại) ·
 Kokoro (tiếng Nhật kém) · edge-tts (chưa rõ điều khoản) · YAMNet tfjs (không còn bản bảo trì) · three-pinata (không có giấy phép).
 Chưa kiểm: Kenney City Kit có GLB không · cú pháp lọc CC0 của Freesound API.
+
+## Thêm 10/11
+- Trailer dọc 9:16 `fin1tr` (~18s, code trong film-fin1.js, mục riêng trong MEME LORE 2): Friend gầm → Banana Cat khóc → câu hỏi + câu Pain → 5 thẻ thành viên → logo. Mỗi shot zoom / tâm riêng.
+- cdp.js --stop giờ tắt hẳn mọi tiến trình của hồ sơ (trước để sót 13 Edge); film-check / sfx-tag dùng hồ sơ + cổng riêng theo --port.
 
 ## Đã có sẵn (đừng làm lại)
 `tools/x/sfx-lint.js` (soát tiếng không cần nghe) · `tools/x/film-sheet.html` (bảng khung) · `js/cine-cam.js` (góc máy, nhịp, wipe, implode…) · `js/vfx-manga.js` (smear, swirl, halftone,
