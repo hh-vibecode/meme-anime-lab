@@ -191,3 +191,14 @@ Trong file phim dùng `window.CineKitFx` (`CineKit.fx` gắn chậm ~20ms). Gọ
 | `blast(F,{x,y,z,t0,life,size})` — lửa nổ khối đặc viền đen → khói nâu | 2 | 0.7 |
 | `rimLight(F,img,x,y,w,h,{col,dir,dark})` — quái ngược sáng | 8 | 11.2 |
 Chưa đo trên GPU thật; `mangaBW` nặng nhất → chỉ bật trong shot cần.
+
+## 11. CHUYỂN CẢNH CHE KHUNG + COMBO ĐỔI GÓC (10/11, fight-1 qua TransNetV2 — dùng trong game film-fin1c4.js, Ver 548)
+```js
+// ① khung nhoè nối cảnh: [giây cắt, hướng ngang]; trong screen(F,t): for(const [c,dir] of SMEAR) if(Math.abs(t-c)<0.06) smearFrame(F,dir*0.06);
+//    smearFrame = chép canvas ra canvas phụ, vẽ chồng 9 lần lệch ngang với alpha 1/(i+1) + K.panLines → vệt nhoè cả màn hình
+// ② kính vỡ che khung: glassWipe(F,t,a,0.44) — 34 mảnh đa giác bay từ chỗ vật vỡ về máy, to dần (f²) phủ kín ở giữa rồi bay qua; tiếng se_glass ở a+0.02
+// ③ trắng xoá nối cảnh: K.flash trắng tăng 0.1s trước mốc cắt, giảm eout 0.4s sau mốc
+// ④ combo đổi góc: chia 1 shot 0.5s thành 3 S(...) ~0.17s, mỗi góc khác hẳn (sau lưng thấp → ngang xa → tiền cảnh lao vào), nối bằng ①;
+//    shotlist ghi loai:'combo' (film-lint cho 0.08–0.25s/góc). Giữ yaw trong ±60° (ảnh phẳng nhìn từ sau sẽ quay sai hướng).
+// ⑤ khựng nhiều góc: trong hit-stop chia 2 S(...) ~0.09s (thẳng → góc giun chéo), âm bản giữ nguyên.
+```

@@ -17,6 +17,11 @@
 | khoảng thở sau nổ lớn | 1.4–1.6s | fight-1 B1, D8 |
 | đường hầm tốc độ | 0.8s | fight-1 C9 |
 | nổ: góc chim → góc giun | 0.9–1.0s mỗi shot | fight-1 A24–A25 |
+| COMBO đổi góc (dồn đòn) | 0.15–0.4s / góc, nối bằng 1 khung nhoè | fight-1 1:36.0–1:37.8 |
+| khựng NHIỀU GÓC lúc va mạnh | 1–2 khung / góc trong hit-stop | fight-1 1:26.4–1:26.5, G |
+| khung nhoè nối cảnh | 1 khung (~0.1s) | fight-1 1:22.4, 1:36.5, 1:36.9 |
+| kính / mảnh vỡ che khung | 0.4–0.5s | fight-1 1:28.2–1:28.6 |
+| trắng xoá nối cảnh | loé 0.1–0.2s + hiện dần 0.4s | fight-1 1:29.5–1:30.0 |
 
 Khung đơn:
 - Âm bản (impact): 1 khung (≈1/12s ở 12 hình/giây). fight-1: ~12 cái / 60s, gần nhau nhất 0.5s.

@@ -61,6 +61,13 @@ Mỗi luật ghi nguồn `(clips/<id> shot / giây)`. Công thức code tương 
 - Thân quái / đuôi / hàm lướt che khung. (kaiju-b #12)
 - Mảnh vỡ nổ che khung. (kaiju-b #5)
 - Trắng xoá 2–3 khung sau tia sáng lớn. (fight-1 A20)
+- (10/11, học từ chỗ cắt TransNetV2 bắt được mà luật cũ sót — xem bảng khung clips/_tn-fight-1 sheet-03/04, chỉ có ở PC)
+- **KHUNG NHOÈ NỐI CẢNH**: trong đoạn đánh nhanh, cắt máy được nối bằng 1 khung (≈0.1s) NHOÈ CẢ MÀN HÌNH theo hướng chuyển động —
+  khung cuối shot cũ hoặc khung đầu shot mới bị kéo vệt; hình mới vào giữa động tác chứ không từ tư thế đứng. (fight-1 1:22.4, 1:27.3, 1:27.8–1:27.9, 1:36.5, 1:36.9, 1:37.3)
+  → Dùng ở chỗ nhân vật bị hất / lao / lướt. Code: `smearFrame` trong film-fin1c4.js (cong-thuc.md mục 11).
+- **KÍNH / MẢNH VỠ CHE KHUNG 0.4–0.5s**: mảnh kính / lưới vỡ lao về máy, phủ kín, bay qua → shot mới. (fight-1 1:28.2–1:28.6) Gắn với 1 vật vỡ có lý do trong cảnh.
+- **TRẮNG XOÁ NỐI CẢNH**: cuối đường hầm tốc độ loé trắng ~0.1–0.2s, shot mới HIỆN DẦN từ trắng ~0.4s (không cắt thẳng). (fight-1 1:28.8–1:30.0)
+- **Âm bản + nhoè 3 khung**: khung đầu cháy sáng nhoè → âm bản 1 khung → shot mới. (fight-1 1:31.6–1:31.9)
 
 ## Nhịp cắt
 - Đoạn đánh 0.2–0.9s/shot, TB ~0.6s; đối mặt 1.0–1.6s; giới thiệu quái 2–3s. (fight-1, kaiju-a/b)

@@ -141,3 +141,8 @@ Máy dò ra 6 cảnh, thật ~12 shot: 1:55.2 rất xa (2 nhân vật nhỏ, n�
 - Gộp sai (thiếu cắt): #1 (1:00–1:04.7) thật 6 shot; #2 (1:04.7–1:07.9) thật 6 shot; #4, #9, #10, #17, #18, #21, #22, #34, #39, #42, #45 đều chứa
   2–5 shot — nét manga đen trắng + halftone làm điểm khác biệt giữa khung luôn cao, ngưỡng cắt bị đẩy lên. Bảng trên đếm bằng mắt.
 - Khung âm bản: máy chỉ đánh FLASH 3 cái (1:25.8, 1:26.5, 1:31.8); bằng mắt ~12 cái (danh sách trong luat.md). Máy chỉ bắt loé SÁNG, không bắt đảo màu.
+
+## Đính chính sau TransNetV2 (10/11)
+Lượt `--tn` (clips/_tn-fight-1, chỉ ở PC) bắt thêm ~10 chỗ cắt đúng (57→67/82). Soát bằng mắt sheet-03/04: phần lớn chỗ luật cũ sót là
+cắt nối bằng **1 khung nhoè** (1:22.4, 1:27.3, 1:27.8, 1:36.5, 1:36.9, 1:37.3), **trắng xoá hiện dần** sau đường hầm (1:29.5–1:30.0), **kính vỡ che khung** (1:28.2–1:28.6).
+Combo 1:36.0–1:37.8: góc 0.3–0.5s nối bằng khung nhoè, kết bằng âm bản + cầu nổ đỏ. Luật mới ghi ở playbook/luat.md mục Chuyển cảnh + nhip.md.
