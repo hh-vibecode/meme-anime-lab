@@ -46,3 +46,6 @@ Công cụ (9/11):
 ## Nhật ký
 - 9/11 PC: dựng công cụ, nạp kaiju-a/b + fight-1, viết phân tích 3 clip + playbook (luat, cong-thuc, nhip); thêm nhịp/lặng cho tiếng.
   PC mất `~/.gitconfig` → đặt tên commit riêng cho repo này (`git config user.name hh-vibecode`, email noreply như các commit trước).
+
+## ⭐ Kế hoạch nâng cấp luồng dựng phim (10/11)
+Đọc `KE-HOACH-NANG-CAP.md` — 10 bước, mỗi bước 1 phiên mới. Chưa bước nào bắt đầu (trừ công cụ `sfx-lint.js` đã có ở repo game).
