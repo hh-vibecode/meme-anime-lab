@@ -91,9 +91,28 @@ Sau đó mới xuất video khi anh bảo.
 Máy dò cắt cảnh còn sót ở chuyển cảnh bằng mảnh vụn / nhoè. Ứng viên CHƯA KIỂM: TransNetV2 (có bản ONNX?), PySceneDetect (Python → Mac). Thêm mẫu ghi chú shot chặt hơn
 (nhân vật / góc máy / hành động) để nối thẳng sang `shotlist` của Bước 6.
 
-## Việc tìm công cụ GitHub còn dở
-Agent tìm công cụ 10/11 bị ngắt giữa chừng (hết hạn mức), CHƯA có danh sách đã kiểm. Mọi tên "ứng viên" ở trên là theo trí nhớ của Claude — bắt buộc mở trang gốc
-xác nhận (có thật, giấy phép, ngày cập nhật, cần gì để chạy) trước khi cài, theo luật Bước 0. Chỉ kiểm công cụ của bước đang làm, không tìm tràn lan.
+## Công cụ ngoài ĐÃ KIỂM (agent mở trang gốc 10/11/2026 — dùng danh sách này, đừng tìm lại)
+DÙNG NGAY trên PC (trình duyệt / file chạy đơn):
+- **transformers.js** github.com/huggingface/transformers.js (Apache-2.0, v4.3.2 10/2026) — "tai máy" Bước 3b: AST `Xenova/ast-finetuned-audioset-10-10-0.4593` (527 nhãn AudioSet, có "Speech"),
+  CLAP zero-shot `Xenova/clap-htsat-unfused` (chấm mp3 theo mô tả), Whisper `Xenova/whisper-small` (đọc thoại). Thử ~20 file biết đáp án trước khi tin CLAP.
+  Cũng chạy được: **Depth Anything V2 Small** `onnx-community/depth-anything-v2-small` (CHỈ bản Small là Apache; Base/Large CC-BY-NC) — tách nền vẽ thành lớp parallax (Bước 4);
+  **BiRefNet_lite** `onnx-community/BiRefNet_lite-ONNX` (MIT) — tách nền nhân vật.
+- **sherpa-onnx** github.com/k2-fsa/sherpa-onnx (Apache-2.0) — dự phòng gắn nhãn tiếng hàng loạt bằng file chạy (Win x64 / macOS arm64). silero-vad (MIT) — tìm đoạn có giọng người.
+- **VOICEVOX Engine** github.com/VOICEVOX/voicevox_engine — bản **windows-directml** chạy GPU AMD; HTTP `127.0.0.1:50021` (`/audio_query` → `/synthesis`). Đọc tên chiêu (Bước 7).
+  Mỗi giọng có luật riêng: vd Zundamon dùng thương mại được NẾU ghi "VOICEVOX:ずんだもん" trong mô tả video → luôn ghi nguồn.
+- **Kenney** Impact Sounds / Sci-fi Sounds / Particle Pack / City Kit (CC0, kenney.nl) — để được trong repo công khai. **Quaternius Downtown City MegaKit** (CC0, glTF, 5/2026).
+- **three.js** (MIT, r187: MeshToonMaterial, OutlineEffect, UnrealBloomPass, Sky) + **pmndrs/postprocessing** (Zlib) — chỉ khi chuyển cảnh phá phố sang 3D thật.
+- **Effekseer** editor + **EffekseerForWebGL** (MIT, hiệu ứng mẫu CC0) — tia / hào quang / sóng chấn động; **three.quarks** (MIT) hạt bằng code.
+- **Real-ESRGAN ncnn-vulkan** (anime model, BSD-3) / **realcugan-ncnn-vulkan** (MIT) / **rife-ncnn-vulkan** (MIT) — exe Vulkan chạy được RX 560: làm nét ảnh GPT, nội suy khung (dùng ít).
+- **Mediabunny** github.com/Vanilagy/mediabunny (MPL-2.0) — đọc/ghi MP4/WebM trong trình duyệt (thay WebM tự ghép).
+Giữ ở máy, KHÔNG để repo: 効果音ラボ soundeffect-lab.info (miễn phí thương mại, cấm phân phối lại, cấm đăng ký Content ID).
+Hỏi anh: Sonniss GDC 2026 (chất lượng cao, nhưng giấy phép 2.0 cấm dùng "để phát triển AI").
+Chỉ Mac: PySceneDetect, Stable Audio Open Small (tạo SE từ chữ), Style-Bert-VITS2 / GPT-SoVITS.
+Thử: TransNetV2 bản ONNX cộng đồng (`elya5/transnetv2`, chưa ai kiểm) · Iki github.com/zeikar/iki (MIT, rig Live2D-kiểu do AI, rất mới).
+Tham khảo cách tổ chức: ViMax (HKUDS, MIT), FilmAgent/VideoClaw (MIT), Anime-Shooter (mẫu ghi chú shot).
+BỎ: ToonCrafter / FramePack / Wan2.2 (cần NVIDIA mạnh) · LivePortrait (chế độ động vật không chạy Mac) · Spine (trả phí) · DragonBones (ngừng) · BRIA RMBG (cấm thương mại) ·
+Kokoro (tiếng Nhật kém) · edge-tts (chưa rõ điều khoản) · YAMNet tfjs (không còn bản bảo trì) · three-pinata (không có giấy phép).
+Chưa kiểm: Kenney City Kit có GLB không · cú pháp lọc CC0 của Freesound API.
 
 ## Đã có sẵn (đừng làm lại)
 `tools/x/sfx-lint.js` (soát tiếng không cần nghe) · `tools/x/film-sheet.html` (bảng khung) · `js/cine-cam.js` (góc máy, nhịp, wipe, implode…) · `js/vfx-manga.js` (smear, swirl, halftone,
