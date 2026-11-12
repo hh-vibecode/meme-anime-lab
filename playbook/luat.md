@@ -25,6 +25,26 @@ Mỗi luật ghi nguồn `(clips/<id> shot / giây)`. Công thức code tương 
 - Hợp 2 năng lượng: 2 cầu 2 màu ép từ 2 mép vào giữa → tia bắn THẲNG VÀO MÁY. (fight-1 A11)
 - Đòn bắn ra: cầu sáng 1 bên khung, người bắn bên kia, sét nhấp nháy. (fight-1 A14)
 
+## TRẬN ĐÁNH THẬT — đọc trước mục Cận chiến (12/11/2026, học từ bản gốc jjk-todo-hanami · jjk-gojo-toji · ds-rengoku-akaza)
+- 1 shot = TRỌN 1 PHA, máy bám theo: lấy đà (thấy rõ, 0.3–1.5s với vũ khí nặng) → ra đòn (1–3 khung) → khựng 0.15–0.25s → phản ứng (trượt lùi, loạng choạng) → giãn ra thủ thế.
+  Đừng cắt mỗi động tác 1 shot (bản cũ của mình 0.4s/shot → anh chê đau mắt, không hiểu ai đánh ai).
+- GIỮ TRỤC: máy đứng 1 phía của 2 người suốt trận, phe A luôn trái / phe B luôn phải. Chỉ đổi bên khi CÓ LÝ DO nhìn thấy (dịch chuyển ra sau lưng, bị hất bay qua đầu).
+- Giữa các hiệp phải có shot THỞ 1.5–3s: cận mặt thở dốc, bụi tan, thoại (hanami #5–#8 nói chuyện 10s giữa trận; gojo-toji giữ hậu quả 2.5–4s).
+- Né phải ĐỌC ĐƯỢC: người né rời đường đòn TRƯỚC khi đòn tới (thấy kiếm giơ cao → bước ra), rồi đòn đập xuống chỗ trống.
+- Mỗi phe 1 MÀU khoá cứng (rengoku lửa cam ↔ akaza xanh lam; cả VFX lẫn ánh hắt).
+- Khoảnh khắc GHÌ (kiếm bị nắm, 2 lưỡi ép nhau) giữ lâu 2–5s với cận mặt 2 bên xen kẽ (rengoku-akaza #31–#36, shot 5.7s).
+- Âm bản / chớp trắng CHỈ ở 2–4 cú quyết định của cả trận (≤ 1 lần / 8s). Smear / vệt tốc độ chỉ ở cú lướt chính, không phủ cả trận.
+- Đường chéo xả: chuỗi shot cực ngắn 0.15s chỉ dùng cho 1 khoảnh khắc nối tiếp CÙNG 1 chuyển động (hanami #76–#80 Todo cưỡi rễ cây: 5 góc nhưng cùng 1 đường bay).
+- ⚠️ ĐỪNG DÙNG MÃI 1 CÔNG THỨC (anh dặn 12/11): mỗi trận phải có cấu trúc + chữ ký dựng riêng theo kiểu nhân vật —
+  đấu kiếm (đối mặt lâu, máy ngang bám từng pha) · trí tuệ / bẫy (hồi hộp, góc cao nhìn xuống, ít đối đầu, nổ dây chuyền) ·
+  sức mạnh thô (đuổi dài 1 shot, phá xuyên nhà) · tầm xa (góc toàn rộng, chiêu lớn đối xứng, khoảng cách 2 bên).
+
+## Tiếng — trận đánh (12/11/2026, gốc jjk / ds còn tiếng gốc)
+- Mỗi VŨ KHÍ 1 GIỌNG cố định cả trận (kiếm nhẹ = katana, kiếm nặng = vung trầm, kiếm va kiếm = 1 tiếng ngân); đừng mỗi cú 1 file khác → nghe lộn xộn.
+- Cú nặng = 2–3 LỚP cùng lúc: vút / lấy đà (đặt sớm đúng bằng độ trễ đỉnh của file) + va + lớp trầm (boom thấp / thịt). Động tác phụ (bước, xoay) KHÔNG cần tiếng.
+- ~1–3 tiếng bật mạnh / 10s trên nền nhạc LIỀN; nhạc TẮT 0.3–0.7s ngay trước cú quyết định rồi tiếng va bật lên (dải lặng thấy rõ ở cả 3 clip gốc).
+- Kho tiếng anime đã đưa vào game: se_* (効果音ラボ) — se_sword_clash, se_katana_a/b, se_big_slash, se_punch_heavy/high, se_kick, se_step_in, se_machdash, se_pushback, se_rock_break, se_wall_break…
+
 ## Cận chiến / tay đôi
 - Tỉ lệ nhảy CỰC ĐOAN: rất xa (nhân vật bé bằng ngón tay, nền trắng) ↔ cực cận (nắm đấm che kín khung). (fight-1 G)
 - Combo: máy XOAY QUANH 2 người, đổi góc mỗi 0.1–0.2s. (fight-1 G 1:57.4–1:58.4)
